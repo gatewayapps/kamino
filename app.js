@@ -1,16 +1,18 @@
 var token = ''
 
+// the button
 var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle repoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
 
 // get url
 var url = document.location.href;
 
-// get the github issue number
+// get the current github issue info
 const urlArray = url.split('/');
 const issueNumber = urlArray[urlArray.length - 1].replace('#', '');
 const organization = urlArray[urlArray.length - 4];
 const currentRepo = urlArray[urlArray.length - 3];
 
+// grab the PAT
 chrome.storage.sync.get({
   githubToken: ''
 }, (item) => {
@@ -18,8 +20,10 @@ chrome.storage.sync.get({
   loadRepos();
 });
 
+// append button to DOM
 $('.gh-header-meta').append(btn);
 
+// get all repos for the user
 function loadRepos() {
   if (!token || token === '') {
     $(".repoButton").prop('disabled', true);
@@ -45,16 +49,17 @@ function loadRepos() {
         $('.repoDropdown').append('<li><a id="' + repo.name + '" class="repoItem" href="#">' + repo.full_name + '</a></li>')
         $('#' + repo.name).bind('click', () => { itemClick(repo.full_name) });
       });
+    },
+    error: (error) => {
+      $(".repoButton").prop('disabled', true);
     }
   })
 }
 
 function itemClick(repo) {
   if (confirm('Are you sure you want to move this issue to another repository?')) {
-    // do the following:
-    // get the issue
+    // get the issue JSON from Github API
     getGithubIssue(repo);
-    // open new tab?
   }
 }
 
@@ -67,6 +72,7 @@ function getGithubIssue(repo) {
     },
     url: 'https://api.github.com/repos/' + organization + '/' + currentRepo + '/issues/' + issueNumber,
     success: (issue) => {
+      // build new issue
       var newIssue = {
         title: issue.title,
         body: 'From ' + currentRepo + ': ' + organization + '/' + currentRepo + '#' + issueNumber + "  \n\n" + issue.body,
@@ -83,6 +89,7 @@ function getGithubIssue(repo) {
   })
 }
 
+// create the cloned GitHub issue
 function createGithubIssue(newIssue, repo, oldIssue) {
   $.ajax({
     type: 'POST',
@@ -93,8 +100,10 @@ function createGithubIssue(newIssue, repo, oldIssue) {
     data: JSON.stringify(newIssue),
     url: 'https://api.github.com/repos/' + repo + '/issues',
     success: (response) => {
+      // add a comment to the closed issue
       commentOnIssue(organization, repo);
-      // if success, close the existing issue
+
+      // if success, close the existing issue and open new in a new tab
       closeGithubIssue(oldIssue);
       window.open('https://github.com/' + repo + '/issues/' + response.number, "_blank");
     },
@@ -118,7 +127,6 @@ function closeGithubIssue(oldIssue) {
     data: JSON.stringify(issueToClose),
     url: 'https://api.github.com/repos/' + organization + '/' + currentRepo + '/issues/' + issueNumber,
     success: (response) => {
-
     },
     error: (error) => {
       console.log(error);

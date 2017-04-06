@@ -6,19 +6,19 @@
                 "https://github.com/*/*/issues/*"
             ],
             "js": [
-                "jquery-3.2.0.min.js",
+                "jquery/jquery-3.2.0.min.js",
                 "bootstrap/js/bootstrap.min.js",
-                "action.js"
+                "app.js"
             ],
             "css": [
-                "style.css"
+                "css/style.css"
             ],
             "run_at": "document_end"
         }
     ],
     "description": "This extension shows a button on Github issue pages that can be used to clone github issues across repositories",
     "icons": {
-        "128": "storm-trooper-128.png"
+        "128": "icons/storm-trooper-128.png"
     },
     "manifest_version": 2,
     "name": "Kamino",
