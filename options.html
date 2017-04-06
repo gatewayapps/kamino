@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kamino Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+    <header id="header">
+        <div class="wrap">
+            <nav id="main_nav" class="right">
+                <ul>
+                    <li class="social">
+                        <a class="twitter" href="http://twitter.com/gatewayappdevs" target="_blank"></a>
+                    </li>
+                    <li class="social">
+                        <a class="facebook" href="http://facebook.com/gatewayapps" target="_blank"></a>
+                    </li>
+                </ul>
+            </nav>
+            <a href="" class="left adblock-logo"><img src="storm-trooper.png" width="50" height="50"></a>
+        </div>
+        <div id="small_nav"></div>
+    </header>
+
+
+    <div id="tabpages" class="ui-tabs ui-widget ui-widget-content ui-corner-all" style="display: block;">
+       
+        <div id="ui-tabs-1" class="ui-tabs-panel ui-widget-content ui-corner-bottom" aria-live="polite" aria-labelledby="ui-id-1"
+            role="tabpanel" aria-expanded="true" aria-hidden="false">
+            <!-- required to help Safari not get confused when injecting this fragment -->
+            <div>
+                <h2 id="generaloptions">General Settings</h2>
+                
+                <p>
+                    <label>GitHub Personal Access Token:</label>
+                    <input type="text" id="github-pat"/>
+                </p>
+            </div>
+
+            <p>
+                <button id="saveButton" class="saveButton">Save</button>
+                <label id="status"></label>
+            </p>
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+
+</html>
