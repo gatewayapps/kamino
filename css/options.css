@@ -74,6 +74,13 @@
       .adblock-logo {
         margin: 10px 0px 0px 10px;
       }
+      .social .feedback {
+        background: transparent url(../icons/smiley.png) no-repeat left top;
+        object-fit: contain;
+        height:30px;
+        width:30px;
+        display: -webkit-box;
+      }
       .social .facebook {
         background: transparent url(../icons/facebook-sprite.png) no-repeat left top;
         height: 23px;
