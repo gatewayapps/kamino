@@ -20,8 +20,10 @@ chrome.storage.sync.get({
   loadRepos();
 });
 
-// append button to DOM
-$('.gh-header-meta').append(btn);
+if (url.indexOf('/pull/') < 0) {
+  // append button to DOM
+  $('.gh-header-meta').append(btn);
+}
 
 // get all repos for the user
 function loadRepos() {
