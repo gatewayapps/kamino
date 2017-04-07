@@ -101,11 +101,7 @@ function createGithubIssue(newIssue, repo, oldIssue) {
     url: 'https://api.github.com/repos/' + repo + '/issues',
     success: (response) => {
       // add a comment to the closed issue
-      commentOnIssue(organization, repo);
-
-      // if success, close the existing issue and open new in a new tab
-      closeGithubIssue(oldIssue);
-      window.open('https://github.com/' + repo + '/issues/' + response.number, "_blank");
+      commentOnIssue(organization, repo, oldIssue, response);
     },
     error: (error) => {
       console.log(error);
@@ -134,7 +130,7 @@ function closeGithubIssue(oldIssue) {
   })
 }
 
-function commentOnIssue(org, repo) {
+function commentOnIssue(org, repo, oldIssue, newIssue) {
   var comment = {
     body: 'Issue closed and cloned to ' + org + '/' + repo
   };
@@ -146,8 +142,11 @@ function commentOnIssue(org, repo) {
       request.setRequestHeader('Content-Type', 'application/json')
     },
     data: JSON.stringify(comment),
-    url: 'https://api.github.com/repos/' + currentRepo + '/issues/' + issueNumber + '/comments',
+    url: 'https://api.github.com/repos/' + org + '/' + currentRepo + '/issues/' + issueNumber + '/comments',
     success: (response) => {
+      // if success, close the existing issue and open new in a new tab
+      closeGithubIssue(oldIssue);
+      window.open('https://github.com/' + repo + '/issues/' + newIssue.number, "_blank");
     },
     error: (error) => {
       console.log(error);
