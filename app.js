@@ -7,10 +7,10 @@ var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggl
 var url = document.location.href;
 
 // get the current github issue info
-const urlArray = url.split('/');
-const issueNumber = urlArray[urlArray.length - 1].replace('#', '');
-const organization = urlArray[urlArray.length - 4];
-const currentRepo = urlArray[urlArray.length - 3];
+var urlArray = url.split('/');
+var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
+var organization = urlArray[urlArray.length - 4];
+var currentRepo = urlArray[urlArray.length - 3];
 
 // grab the PAT
 chrome.storage.sync.get({

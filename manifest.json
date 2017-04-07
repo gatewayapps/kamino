@@ -3,7 +3,7 @@
     "content_scripts": [
         {
             "matches": [
-                "https://github.com/*/*/issues/*"
+                "*://github.com/*/*/issues/*"
             ],
             "js": [
                 "jquery/jquery-3.2.0.min.js",
@@ -16,6 +16,9 @@
             "run_at": "document_end"
         }
     ],
+    "background": {
+        "scripts":["background.js"]
+    },
     "description": "This extension shows a button on Github issue pages that can be used to clone github issues across repositories",
     "icons": {
         "128": "icons/storm-trooper-128.png"
@@ -26,7 +29,18 @@
     "permissions": [
         "tabs",
         "storage",
-        "https://github.com/*/*/issues/*"
+        "webNavigation",
+        "*://github.com/*"
     ],
-    "version": "1.0"
+    "version": "1.2",
+    "web_accessible_resources":[
+        "icons/*.png",
+        "bootstrap/js/bootstrap.min.js",
+        "css/*.css",
+        "jquery/jquery-3.2.0.min.js",
+        "app.js",
+        "options.html",
+        "options.js",
+        "background.js"
+    ]
 }
