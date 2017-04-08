@@ -1,7 +1,7 @@
 var token = ''
 
 // the button
-var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle repoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
+var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle kaminoBtn" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
 
 // get url
 var url = document.location.href;
@@ -20,7 +20,7 @@ chrome.storage.sync.get({
   loadRepos();
 });
 
-if (url.indexOf('/pull/') < 0) {
+if (url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
   // append button to DOM
   $('.gh-header-meta').append(btn);
 }
@@ -28,7 +28,7 @@ if (url.indexOf('/pull/') < 0) {
 // get all repos for the user
 function loadRepos() {
   if (!token || token === '') {
-    $(".repoButton").prop('disabled', true);
+    $(".kaminoBtn").prop('disabled', true);
   }
 
   $.ajax({
@@ -53,7 +53,7 @@ function loadRepos() {
       });
     },
     error: (error) => {
-      $(".repoButton").prop('disabled', true);
+      $(".kaminoBtn").prop('disabled', true);
     }
   })
 }
