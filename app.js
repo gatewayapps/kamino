@@ -1,7 +1,8 @@
 var token = ''
 
 // the button
-var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle kaminoBtn" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
+var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle repoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
+var popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info" data-dismiss="modal">No</button></div></div></div></div>')
 
 // get url
 var url = document.location.href;
@@ -20,15 +21,16 @@ chrome.storage.sync.get({
   loadRepos();
 });
 
-if (url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
+if (url.indexOf('/pull/') < 0) {
   // append button to DOM
   $('.gh-header-meta').append(btn);
+  $('.gh-header-meta').append(popup);
 }
 
 // get all repos for the user
 function loadRepos() {
   if (!token || token === '') {
-    $(".kaminoBtn").prop('disabled', true);
+    $(".repoButton").prop('disabled', true);
   }
 
   $.ajax({
@@ -48,24 +50,27 @@ function loadRepos() {
       })
 
       repos.forEach((repo) => {
-        $('.repoDropdown').append('<li><a id="' + repo.name + '" class="repoItem" href="#">' + repo.full_name + '</a></li>')
+        $('.repoDropdown').append('<li data-toggle="modal" id="' + repo.name + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repo.full_name + '</a></li>')
         $('#' + repo.name).bind('click', () => { itemClick(repo.full_name) });
       });
     },
     error: (error) => {
-      $(".kaminoBtn").prop('disabled', true);
+      $(".repoButton").prop('disabled', true);
     }
   })
 }
 
+$('.cloneNow').click(() => {
+  getGithubIssue($('.cloneNow').attr('data-repo'));
+})
+
 function itemClick(repo) {
-  if (confirm('Are you sure you want to move this issue to another repository?')) {
-    // get the issue JSON from Github API
-    getGithubIssue(repo);
-  }
+  $('.cloneNow').attr('data-repo', repo)
+  $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.');
 }
 
 function getGithubIssue(repo) {
+  console.log('get issue from ' + repo)
   $.ajax({
     type: 'GET',
     beforeSend: (request) => {
@@ -134,7 +139,7 @@ function closeGithubIssue(oldIssue) {
 
 function commentOnIssue(org, repo, oldIssue, newIssue) {
   var comment = {
-    body: 'Kamino closed and cloned this issue to ' + org + '/' + repo
+    body: 'Issue closed and cloned to ' + org + '/' + repo
   };
 
   $.ajax({
