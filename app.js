@@ -180,7 +180,7 @@ function closeGithubIssue(oldIssue) {
 
 function commentOnIssue(org, repo, oldIssue, newIssue) {
   var comment = {
-    body: 'Issue closed and cloned to ' + org + '/' + repo
+    body: 'Kamino closed and cloned this issue to ' + org + '/' + repo
   };
 
   $.ajax({
