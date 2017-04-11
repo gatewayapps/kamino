@@ -7,14 +7,20 @@ var currentRepo = ''
 if (token === '') {
   // load jquery via JS
   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js', () => {
-    initializeExtension();
+    setInterval(
+      () => {initializeExtension()}
+      , 1000);
   });
 }
 
 function initializeExtension() {
+  if ($('.kaminoButton').length > 0) {
+    return;
+  }
+
   // the button
-  var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
-  var popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info" data-dismiss="modal">No</button></div></div></div></div>')
+  var btn = $('<div class="dropdown"><button class="btn btn-sm btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
+  var popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
 
   // get url
   var url = document.location.href;
@@ -35,8 +41,8 @@ function initializeExtension() {
 
   if (url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
     // append button to DOM
-    $('.gh-header-meta').append(btn);
-    $('.gh-header-meta').append(popup);
+    $('.gh-header-actions').append(btn);
+    $('.gh-header-actions').append(popup);
 
     $('.kaminoButton').click(() => {
       // make sure the bootstrap dropdown opens and closes properly
@@ -52,8 +58,20 @@ function initializeExtension() {
       chrome.storage.sync.get({
         githubToken: ''
       }, (item) => {
+        $('#kaminoModal').removeClass('in');
+        $('#kaminoModal').css('display', '');
         getGithubIssue($('.cloneNow').attr('data-repo'));
       })
+    })
+
+    $('.close').click(() => {
+      $('#kaminoModal').removeClass('in');
+      $('#kaminoModal').css('display', '');
+    })
+
+    $('.noClone').click(() => {
+      $('#kaminoModal').removeClass('in');
+      $('#kaminoModal').css('display', '');
     })
   }
 }
@@ -81,6 +99,9 @@ function loadRepos() {
         return item.full_name !== currentRepo;
       })
 
+      // clear the list each time to avoid duplicates
+      $('.repoDropdown').empty();
+
       repos.forEach((repo) => {
         $('.repoDropdown').append('<li data-toggle="modal" id="' + repo.name + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repo.full_name + '</a></li>')
         $('#' + repo.name).bind('click', () => { itemClick(repo.full_name) });
@@ -94,8 +115,10 @@ function loadRepos() {
 }
 
 function itemClick(repo) {
-  $('.cloneNow').attr('data-repo', repo)
+  $('.cloneNow').attr('data-repo', repo);
   $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.');
+  $('#kaminoModal').addClass('in');
+  $('#kaminoModal').css('display', 'block');
 }
 
 function getGithubIssue(repo) {
