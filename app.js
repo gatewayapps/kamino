@@ -1,36 +1,68 @@
 var token = ''
+var issueNumber = ''
+var organization = ''
+var currentRepo = ''
 
-// the button
-var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle repoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
-var popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info" data-dismiss="modal">No</button></div></div></div></div>')
+// don't try to re initialize the extension if there's a token in memory
+if (token === '') {
+  // load jquery via JS
+  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js', () => {
+    initializeExtension();
+  });
+}
 
-// get url
-var url = document.location.href;
+function initializeExtension() {
+  // the button
+  var btn = $('<div class="dropdown"><button class="btn btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
+  var popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info" data-dismiss="modal">No</button></div></div></div></div>')
 
-// get the current github issue info
-var urlArray = url.split('/');
-var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
-var organization = urlArray[urlArray.length - 4];
-var currentRepo = urlArray[urlArray.length - 3];
+  // get url
+  var url = document.location.href;
 
-// grab the PAT
-chrome.storage.sync.get({
-  githubToken: ''
-}, (item) => {
-  token = item.githubToken
-  loadRepos();
-});
+  // get the current github issue info
+  var urlArray = url.split('/');
+  issueNumber = urlArray[urlArray.length - 1].replace('#', '');
+  organization = urlArray[urlArray.length - 4];
+  currentRepo = urlArray[urlArray.length - 3];
 
-if (url.indexOf('/pull/') < 0) {
-  // append button to DOM
-  $('.gh-header-meta').append(btn);
-  $('.gh-header-meta').append(popup);
+  // grab the PAT
+  chrome.storage.sync.get({
+    githubToken: ''
+  }, (item) => {
+    token = item.githubToken
+    loadRepos();
+  })
+
+  if (url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
+    // append button to DOM
+    $('.gh-header-meta').append(btn);
+    $('.gh-header-meta').append(popup);
+
+    $('.kaminoButton').click(() => {
+      // make sure the bootstrap dropdown opens and closes properly
+      if ($('.dropdown').hasClass('open')) {
+        $('.dropdown').removeClass('open');
+      }
+      else {
+        $('.dropdown').addClass('open');
+      }
+    })
+
+    $('.cloneNow').click(() => {
+      chrome.storage.sync.get({
+        githubToken: ''
+      }, (item) => {
+        getGithubIssue($('.cloneNow').attr('data-repo'));
+      })
+    })
+  }
 }
 
 // get all repos for the user
 function loadRepos() {
-  if (!token || token === '') {
-    $(".repoButton").prop('disabled', true);
+  if (token === '') {
+    console.log('disabling button because there is no Personal Access Token for authentication with Github')
+    $(".kaminoButton").prop('disabled', true);
   }
 
   $.ajax({
@@ -55,14 +87,11 @@ function loadRepos() {
       });
     },
     error: (error) => {
-      $(".repoButton").prop('disabled', true);
+      console.log('disabling because get repository request failed')
+      $(".kaminoButton").prop('disabled', true);
     }
   })
 }
-
-$('.cloneNow').click(() => {
-  getGithubIssue($('.cloneNow').attr('data-repo'));
-})
 
 function itemClick(repo) {
   $('.cloneNow').attr('data-repo', repo)
@@ -88,7 +117,13 @@ function getGithubIssue(repo) {
         assignees: issue.assignees
       }
 
-      createGithubIssue(newIssue, repo, issue);
+      // grab the PAT
+      chrome.storage.sync.get({
+        githubToken: ''
+      }, (item) => {
+        token = item.githubToken
+        createGithubIssue(newIssue, repo, issue);
+      })
     },
     error: (error) => {
       console.log(error);
@@ -108,7 +143,13 @@ function createGithubIssue(newIssue, repo, oldIssue) {
     url: 'https://api.github.com/repos/' + repo + '/issues',
     success: (response) => {
       // add a comment to the closed issue
-      commentOnIssue(organization, repo, oldIssue, response);
+      // grab the PAT
+      chrome.storage.sync.get({
+        githubToken: ''
+      }, (item) => {
+        token = item.githubToken
+        commentOnIssue(organization, repo, oldIssue, response);
+      })
     },
     error: (error) => {
       console.log(error);
@@ -139,7 +180,7 @@ function closeGithubIssue(oldIssue) {
 
 function commentOnIssue(org, repo, oldIssue, newIssue) {
   var comment = {
-    body: 'Issue closed and cloned to ' + org + '/' + repo
+    body: 'Kamino closed and cloned this issue to ' + org + '/' + repo
   };
 
   $.ajax({
@@ -152,8 +193,14 @@ function commentOnIssue(org, repo, oldIssue, newIssue) {
     url: 'https://api.github.com/repos/' + org + '/' + currentRepo + '/issues/' + issueNumber + '/comments',
     success: (response) => {
       // if success, close the existing issue and open new in a new tab
-      closeGithubIssue(oldIssue);
-      window.open('https://github.com/' + repo + '/issues/' + newIssue.number, "_blank");
+      // grab the PAT
+      chrome.storage.sync.get({
+        githubToken: ''
+      }, (item) => {
+        token = item.githubToken
+        closeGithubIssue(oldIssue);
+        window.open('https://github.com/' + repo + '/issues/' + newIssue.number, "_blank");
+      })
     },
     error: (error) => {
       console.log(error);

@@ -7,7 +7,6 @@
             ],
             "js": [
                 "jquery/jquery-3.2.0.min.js",
-                "bootstrap/js/bootstrap.min.js",
                 "app.js"
             ],
             "css": [
