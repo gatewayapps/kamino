@@ -37,7 +37,7 @@ a {
     overflow-y: auto;
     overflow-x: hidden;
     padding: 5px 0;
-    margin: 35px 0 0 !important;
+    margin: 67px 0 0 !important;
     font-size: 14px;
     text-align: left;
     list-style: none;
@@ -52,7 +52,8 @@ a {
 }
 
 .kaminoButton {
-    float: right;
+    float: right !important;
+    margin: 5px 0 5px 5px !important;
 }
 
 .open>.dropdown-menu {
