@@ -1,14 +1,11 @@
 var token = ''
-var issueNumber = ''
-var organization = ''
-var currentRepo = ''
 
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js', () => {
     setInterval(
-      () => {initializeExtension()}
+      () => { initializeExtension() }
       , 1000);
   });
 }
@@ -25,24 +22,20 @@ function initializeExtension() {
   // get url
   var url = document.location.href;
 
-  // get the current github issue info
-  var urlArray = url.split('/');
-  issueNumber = urlArray[urlArray.length - 1].replace('#', '');
-  organization = urlArray[urlArray.length - 4];
-  currentRepo = urlArray[urlArray.length - 3];
-
-  // grab the PAT
-  chrome.storage.sync.get({
-    githubToken: ''
-  }, (item) => {
-    token = item.githubToken
-    loadRepos();
-  })
-
   if (url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
     // append button to DOM
     $('.gh-header-actions').append(btn);
     $('.gh-header-actions').append(popup);
+
+    // grab the PAT
+    chrome.storage.sync.get({
+      githubToken: ''
+    }, (item) => {
+      token = item.githubToken
+      if ($('.kaminoButton').length > 0) {
+        loadRepos();
+      }
+    })
 
     $('.kaminoButton').click(() => {
       // make sure the bootstrap dropdown opens and closes properly
@@ -60,7 +53,13 @@ function initializeExtension() {
       }, (item) => {
         $('#kaminoModal').removeClass('in');
         $('#kaminoModal').css('display', '');
-        getGithubIssue($('.cloneNow').attr('data-repo'));
+
+        chrome.storage.sync.get({
+          githubToken: ''
+        }, (item) => {
+          token = item.githubToken
+          getGithubIssue($('.cloneNow').attr('data-repo'));
+        })
       })
     })
 
@@ -91,6 +90,11 @@ function loadRepos() {
     },
     url: 'https://api.github.com/user/repos?per_page=1000',
     success: (repos) => {
+      // get the current github issue info
+      var url = document.location.href;
+      var urlArray = url.split('/');
+      var currentRepo = urlArray[urlArray.length - 3]
+
       // sort the repo
       repos = repos.sort((a, b) => a.full_name.localeCompare(b.full_name));
 
@@ -122,7 +126,12 @@ function itemClick(repo) {
 }
 
 function getGithubIssue(repo) {
-  console.log('get issue from ' + repo)
+  var url = document.location.href;
+  var urlArray = url.split('/');
+  var currentRepo = urlArray[urlArray.length - 3]
+  var organization = urlArray[urlArray.length - 4]
+  var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
+
   $.ajax({
     type: 'GET',
     beforeSend: (request) => {
@@ -170,6 +179,10 @@ function createGithubIssue(newIssue, repo, oldIssue) {
       chrome.storage.sync.get({
         githubToken: ''
       }, (item) => {
+        var url = document.location.href;
+        var urlArray = url.split('/');
+        var organization = urlArray[urlArray.length - 4]
+
         token = item.githubToken
         commentOnIssue(organization, repo, oldIssue, response);
       })
@@ -184,6 +197,12 @@ function closeGithubIssue(oldIssue) {
   var issueToClose = {
     state: 'closed'
   };
+
+  var url = document.location.href;
+  var urlArray = url.split('/');
+  var currentRepo = urlArray[urlArray.length - 3]
+  var organization = urlArray[urlArray.length - 4]
+  var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
 
   $.ajax({
     type: 'PATCH',
@@ -205,6 +224,11 @@ function commentOnIssue(org, repo, oldIssue, newIssue) {
   var comment = {
     body: 'Kamino closed and cloned this issue to ' + org + '/' + repo
   };
+
+  var url = document.location.href;
+  var urlArray = url.split('/');
+  var currentRepo = urlArray[urlArray.length - 3]
+  var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
 
   $.ajax({
     type: 'POST',
