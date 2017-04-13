@@ -4,4 +4,12 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
             chrome.tabs.insertCSS(null, { file: "css/style.css", runAt: 'document_end' });
         });
     })
-}) 
+})
+
+chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'installed') {
+        chrome.tabs.create({ url: 'https://github.com/gatewayapps/kamino' }, (tab) => {
+            console.log("Kamino Github page launched")
+        })
+    }
+})
