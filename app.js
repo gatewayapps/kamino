@@ -112,7 +112,6 @@ function getGithubIssue(repo) {
         milestone: issue.milestone,
         labels: issue.labels
       }
-      console.log(newIssue)
       createGithubIssue(newIssue, repo, issue)
     },
     (error) => {
