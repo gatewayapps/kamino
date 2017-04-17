@@ -1,261 +1,227 @@
 var token = ''
+
+// the backdrop
 var backdrop = $('<div class="kamino-backdrop fade in"></div>');
 
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js', () => {
-    setInterval(
-      () => { initializeExtension() }
-      , 1000);
-  });
+    setInterval(() => { initializeExtension() }, 1000)
+  })
 }
 
 function initializeExtension() {
+  // if there's already a button on the screen, exit
   if ($('.kaminoButton').length > 0) {
-    return;
+    return
   }
 
   // the button
-  var btn = $('<div class="dropdown"><button class="btn btn-sm btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>');
-  var popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
+  const btn = $('<div class="dropdown"><button class="btn btn-sm btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
+  // the modal
+  const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
 
   // get url
-  var url = document.location.href;
+  const urlObj = populateUrlMetadata()
 
-  if (url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
-    // append button to DOM
-    $('.gh-header-actions').append(btn);
-    $('.gh-header-actions').append(popup);
+  // if the page is not a pull request page and there is no Kamino button in the DOM, proceed
+  if (urlObj.url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
+    // append button and modal to DOM
+    $('.gh-header-actions').append(btn)
+    $('.gh-header-actions').append(popup)
 
-    // grab the PAT
+    // load the token
     chrome.storage.sync.get({
       githubToken: ''
     }, (item) => {
       token = item.githubToken
+      // grab the PAT
       if ($('.kaminoButton').length > 0) {
-        loadRepos();
+        loadRepos()
       }
     })
 
     $('.kaminoButton').click(() => {
       // make sure the bootstrap dropdown opens and closes properly
       if ($('.dropdown').hasClass('open')) {
-        $('.dropdown').removeClass('open');
+        $('.dropdown').removeClass('open')
       }
       else {
-        $('.dropdown').addClass('open');
+        $('.dropdown').addClass('open')
       }
     })
 
     $('.cloneNow').click(() => {
-      $('.kamino-backdrop').remove();
-      chrome.storage.sync.get({
-        githubToken: ''
-      }, (item) => {
-        $('#kaminoModal').removeClass('in');
-        $('#kaminoModal').css('display', '');
-
-        chrome.storage.sync.get({
-          githubToken: ''
-        }, (item) => {
-          token = item.githubToken
-          getGithubIssue($('.cloneNow').attr('data-repo'));
-        })
-      })
+      closeModal()
+      getGithubIssue($('.cloneNow').attr('data-repo'))
     })
 
     $('.close').click(() => {
-      $('#kaminoModal').removeClass('in');
-      $('#kaminoModal').css('display', '');
-      $('.kamino-backdrop').remove();
+      closeModal()
     })
 
     $('.noClone').click(() => {
-      $('#kaminoModal').removeClass('in');
-      $('#kaminoModal').css('display', '');
-      $('.kamino-backdrop').remove();
+      closeModal()
     })
   }
 }
 
-// get all repos for the user
 function loadRepos() {
+  // if there's no personal access token, disable the button
   if (token === '') {
     console.log('disabling button because there is no Personal Access Token for authentication with Github')
-    $(".kaminoButton").prop('disabled', true);
+    $(".kaminoButton").prop('disabled', true)
   }
 
-  $.ajax({
-    type: 'GET',
-    beforeSend: (request) => {
-      request.setRequestHeader("Authorization", "token " + token)
-      request.setRequestHeader('Content-Type', 'application/json')
-    },
-    url: 'https://api.github.com/user/repos?per_page=1000',
-    success: (repos) => {
-      // get the current github issue info
-      var url = document.location.href;
-      var urlArray = url.split('/');
-      var currentRepo = urlArray[urlArray.length - 3]
+  // get a list of repos for the user
+  ajaxRequest('GET', '', 'https://api.github.com/user/repos?per_page=1000',
+    (repos) => {
+      // get the current github issue info from the url
+      const urlObj = populateUrlMetadata()
 
       // sort the repo
-      repos = repos.sort((a, b) => a.full_name.localeCompare(b.full_name));
+      repos = repos.sort((a, b) => a.full_name.localeCompare(b.full_name))
 
       // remove the repo you're currently on
       repos = repos.filter((item) => {
-        return item.full_name !== currentRepo;
+        return item.full_name !== urlObj.currentRepo
       })
 
       // clear the list each time to avoid duplicates
-      $('.repoDropdown').empty();
+      $('.repoDropdown').empty()
 
       repos.forEach((repo) => {
         $('.repoDropdown').append('<li data-toggle="modal" id="' + repo.name + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repo.full_name + '</a></li>')
-        $('#' + repo.name).bind('click', () => { itemClick(repo.full_name) });
-      });
+        $('#' + repo.name).bind('click', () => { itemClick(repo.full_name) })
+      })
     },
-    error: (error) => {
-      console.log('disabling because get repository request failed')
-      $(".kaminoButton").prop('disabled', true);
-    }
-  })
-}
-
-function itemClick(repo) {
-  $('.cloneNow').attr('data-repo', repo);
-  $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.');
-  $('#kaminoModal').addClass('in');
-  $('#kaminoModal').css('display', 'block');
-  $('#js-repo-pjax-container').append(backdrop);
+    (error) => {
+      console.error('disabling because get repository request failed')
+      console.error(error)
+      $(".kaminoButton").prop('disabled', true)
+    })
 }
 
 function getGithubIssue(repo) {
-  var url = document.location.href;
-  var urlArray = url.split('/');
-  var currentRepo = urlArray[urlArray.length - 3]
-  var organization = urlArray[urlArray.length - 4]
-  var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
+  const urlObj = populateUrlMetadata()
 
-  $.ajax({
-    type: 'GET',
-    beforeSend: (request) => {
-      request.setRequestHeader("Authorization", "token " + token)
-      request.setRequestHeader('Content-Type', 'application/json')
-    },
-    url: 'https://api.github.com/repos/' + organization + '/' + currentRepo + '/issues/' + issueNumber,
-    success: (issue) => {
+  ajaxRequest('GET', '', 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber,
+    (issue) => {
       // build new issue
-      var newIssue = {
+      const newIssue = {
         title: issue.title,
-        body: 'From ' + currentRepo + ': ' + organization + '/' + currentRepo + '#' + issueNumber + "  \n\n" + issue.body,
+        body: 'From ' + urlObj.currentRepo + ': ' + urlObj.organization + '/' + urlObj.currentRepo + '#' + urlObj.issueNumber + "  \n\n" + issue.body,
         milestone: issue.milestone,
-        labels: issue.labels,
-        assignees: issue.assignees
+        labels: issue.labels
       }
-
-      // grab the PAT
-      chrome.storage.sync.get({
-        githubToken: ''
-      }, (item) => {
-        token = item.githubToken
-        createGithubIssue(newIssue, repo, issue);
-      })
+      createGithubIssue(newIssue, repo, issue)
     },
-    error: (error) => {
-      console.log(error);
-    }
-  })
+    (error) => {
+      console.error(error)
+    })
 }
 
 // create the cloned GitHub issue
 function createGithubIssue(newIssue, repo, oldIssue) {
-  $.ajax({
-    type: 'POST',
-    beforeSend: (request) => {
-      request.setRequestHeader("Authorization", "token " + token)
-      request.setRequestHeader('Content-Type', 'application/json')
-    },
-    data: JSON.stringify(newIssue),
-    url: 'https://api.github.com/repos/' + repo + '/issues',
-    success: (response) => {
+  ajaxRequest('POST', newIssue, 'https://api.github.com/repos/' + repo + '/issues',
+    (response) => {
       // add a comment to the closed issue
-      // grab the PAT
-      chrome.storage.sync.get({
-        githubToken: ''
-      }, (item) => {
-        var url = document.location.href;
-        var urlArray = url.split('/');
-        var organization = urlArray[urlArray.length - 4]
-
-        token = item.githubToken
-        commentOnIssue(organization, repo, oldIssue, response);
-      })
+      commentOnIssue(repo, oldIssue, response)
     },
-    error: (error) => {
-      console.log(error);
-    }
-  })
+    (error) => {
+      console.error(error)
+    })
 }
 
 function closeGithubIssue(oldIssue) {
-  var issueToClose = {
+  const issueToClose = {
     state: 'closed'
-  };
+  }
 
-  var url = document.location.href;
-  var urlArray = url.split('/');
-  var currentRepo = urlArray[urlArray.length - 3]
-  var organization = urlArray[urlArray.length - 4]
-  var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
+  const urlObj = populateUrlMetadata()
 
-  $.ajax({
-    type: 'PATCH',
-    beforeSend: (request) => {
-      request.setRequestHeader("Authorization", "token " + token)
-      request.setRequestHeader('Content-Type', 'application/json')
+  ajaxRequest('PATCH', issueToClose, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber,
+    (response) => {
     },
-    data: JSON.stringify(issueToClose),
-    url: 'https://api.github.com/repos/' + organization + '/' + currentRepo + '/issues/' + issueNumber,
-    success: (response) => {
+    (error) => {
+      console.error(error)
+    })
+}
+
+function commentOnIssue(repo, oldIssue, newIssue) {
+  const urlObj = populateUrlMetadata()
+
+  const comment = {
+    body: 'Kamino closed and cloned this issue to ' + urlObj.organization + '/' + repo
+  }
+
+  ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments',
+    (response) => {
+      // if success, close the existing issue and open new in a new tab
+      closeGithubIssue(oldIssue)
+      window.open('https://github.com/' + repo + '/issues/' + newIssue.number, "_blank")
     },
-    error: (error) => {
-      console.log(error);
-    }
+    (error) => {
+      console.error(error)
+    })
+}
+
+function ajaxRequest(type, data, url, successCallback, errorCallback) {
+  chrome.storage.sync.get({
+    githubToken: ''
+  }, (item) => {
+    token = item.githubToken
+    $.ajax({
+      type: type,
+      beforeSend: (request) => {
+        request.setRequestHeader('Authorization', 'token ' + token)
+        request.setRequestHeader('Content-Type', 'application/json')
+      },
+      data: JSON.stringify(data),
+      url: url,
+      success: (response) => {
+        successCallback(response)
+      },
+      error: (err) => {
+        errorCallback(err)
+      }
+    })
   })
 }
 
-function commentOnIssue(org, repo, oldIssue, newIssue) {
-  var comment = {
-    body: 'Kamino closed and cloned this issue to ' + org + '/' + repo
-  };
+function populateUrlMetadata() {
+  var url = document.location.href
+  const urlArray = url.split('/')
+  const currentRepo = urlArray[urlArray.length - 3]
+  const organization = urlArray[urlArray.length - 4]
+  const issueNumber = urlArray[urlArray.length - 1].replace('#', '')
 
-  var url = document.location.href;
-  var urlArray = url.split('/');
-  var currentRepo = urlArray[urlArray.length - 3]
-  var issueNumber = urlArray[urlArray.length - 1].replace('#', '');
+  const urlObject = {
+    url: url,
+    currentRepo: currentRepo,
+    organization: organization,
+    issueNumber: issueNumber
+  }
 
-  $.ajax({
-    type: 'POST',
-    beforeSend: (request) => {
-      request.setRequestHeader("Authorization", "token " + token)
-      request.setRequestHeader('Content-Type', 'application/json')
-    },
-    data: JSON.stringify(comment),
-    url: 'https://api.github.com/repos/' + org + '/' + currentRepo + '/issues/' + issueNumber + '/comments',
-    success: (response) => {
-      // if success, close the existing issue and open new in a new tab
-      // grab the PAT
-      chrome.storage.sync.get({
-        githubToken: ''
-      }, (item) => {
-        token = item.githubToken
-        closeGithubIssue(oldIssue);
-        window.open('https://github.com/' + repo + '/issues/' + newIssue.number, "_blank");
-      })
-    },
-    error: (error) => {
-      console.log(error);
-    }
-  })
+  return urlObject
+}
+
+function itemClick(repo) {
+  $('.cloneNow').attr('data-repo', repo)
+  $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.')
+  openModal()
+}
+
+function closeModal() {
+  // make sure the modal closes properly
+  $('.kamino-backdrop').remove();
+  $('#kaminoModal').removeClass('in')
+  $('#kaminoModal').css('display', '')
+}
+
+function openModal() {
+  $('#kaminoModal').addClass('in')
+  $('#kaminoModal').css('display', 'block')
+  $('#js-repo-pjax-container').append(backdrop);
 }
