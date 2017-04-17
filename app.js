@@ -1,5 +1,8 @@
 var token = ''
 
+// the backdrop
+var backdrop = $('<div class="kamino-backdrop fade in"></div>');
+
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
@@ -212,6 +215,7 @@ function itemClick(repo) {
 
 function closeModal() {
   // make sure the modal closes properly
+  $('.kamino-backdrop').remove();
   $('#kaminoModal').removeClass('in')
   $('#kaminoModal').css('display', '')
 }
@@ -219,4 +223,5 @@ function closeModal() {
 function openModal() {
   $('#kaminoModal').addClass('in')
   $('#kaminoModal').css('display', 'block')
+  $('#js-repo-pjax-container').append(backdrop);
 }
