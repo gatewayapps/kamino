@@ -110,10 +110,9 @@ function getGithubIssue(repo) {
         title: issue.title,
         body: 'From ' + urlObj.currentRepo + ': ' + urlObj.organization + '/' + urlObj.currentRepo + '#' + urlObj.issueNumber + "  \n\n" + issue.body,
         milestone: issue.milestone,
-        labels: issue.labels,
-        assignees: issue.assignees
+        labels: issue.labels
       }
-
+      console.log(newIssue)
       createGithubIssue(newIssue, repo, issue)
     },
     (error) => {
@@ -149,11 +148,11 @@ function closeGithubIssue(oldIssue) {
 }
 
 function commentOnIssue(repo, oldIssue, newIssue) {
-  const comment = {
-    body: 'Kamino closed and cloned this issue to ' + org + '/' + repo
-  }
-
   const urlObj = populateUrlMetadata()
+
+  const comment = {
+    body: 'Kamino closed and cloned this issue to ' + urlObj.organization + '/' + repo
+  }
 
   ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments',
     (response) => {
