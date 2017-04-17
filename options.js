@@ -13,16 +13,15 @@ function save_options() {
   });
 }
 
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
+// Restores options
 function restore_options() {
-  // Use default value color = 'red' and likesColor = true.
   chrome.storage.sync.get({
     githubToken: ''
   }, function(items) {
     document.getElementById('github-pat').value = items.githubToken;
   });
 }
+
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('saveButton').addEventListener('click',
     save_options);
