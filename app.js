@@ -1,4 +1,5 @@
 var token = ''
+var backdrop = $('<div class="kamino-backdrop fade in"></div>');
 
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
@@ -48,6 +49,7 @@ function initializeExtension() {
     })
 
     $('.cloneNow').click(() => {
+      $('.kamino-backdrop').remove();
       chrome.storage.sync.get({
         githubToken: ''
       }, (item) => {
@@ -66,11 +68,13 @@ function initializeExtension() {
     $('.close').click(() => {
       $('#kaminoModal').removeClass('in');
       $('#kaminoModal').css('display', '');
+      $('.kamino-backdrop').remove();
     })
 
     $('.noClone').click(() => {
       $('#kaminoModal').removeClass('in');
       $('#kaminoModal').css('display', '');
+      $('.kamino-backdrop').remove();
     })
   }
 }
@@ -123,6 +127,7 @@ function itemClick(repo) {
   $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.');
   $('#kaminoModal').addClass('in');
   $('#kaminoModal').css('display', 'block');
+  $('#js-repo-pjax-container').append(backdrop);
 }
 
 function getGithubIssue(repo) {
