@@ -19,7 +19,7 @@ function initializeExtension() {
 
   // the button
   const newBtn = $('<div class="TableObject-item btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
-  const btn = $('<div class="dropdown"><button class="btn btn-sm btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
+  
   // the modal
   const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
 
