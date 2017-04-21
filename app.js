@@ -18,7 +18,7 @@ function initializeExtension() {
   }
 
   // the button
-  const newBtn = $('<div class="TableObject-item btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to ims-shared-core</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
+  const newBtn = $('<div class="TableObject-item btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
   const btn = $('<div class="dropdown"><button class="btn btn-sm btn-primary dropdown-toggle kaminoButton" type="button" data-toggle="dropdown">Clone issue to<span class="caret"></span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
   // the modal
   const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
@@ -33,7 +33,7 @@ function initializeExtension() {
     $('.gh-header-meta').append(popup)
 
     // remove the open class just to be sure
-    $('.dropdown').removeClass('open');
+    $('.btn-group').removeClass('open');
 
     // load the token
     chrome.storage.sync.get({
@@ -48,11 +48,15 @@ function initializeExtension() {
 
     $('.kaminoButton').click(() => {
       // make sure the bootstrap dropdown opens and closes properly
-      if ($('.btn-group').hasClass('open')) {
-        $('.btn-group').removeClass('open')
+      openDropdown()
+    })
+
+    $('.quickClone').click(() => {
+      if ($('.quickClone').attr('data-repo') === undefined) {
+        openDropdown()
       }
       else {
-        $('.btn-group').addClass('open')
+        itemClick($('.quickClone').attr('data-repo'))
       }
     })
 
@@ -94,6 +98,9 @@ function loadRepos() {
       }, (item) => {
         // check for a populated list
         if (item.mostUsed && item.mostUsed.length > 0) {
+          $('.quickClone').attr('data-repo', item.mostUsed[0]);
+          $('.quickClone').text('Clone issue to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+
           // add separator header
           $('.repoDropdown').append('<li class="dropdown-header">Most Used</li>')
 
@@ -111,6 +118,9 @@ function loadRepos() {
 
           // add separator header
           $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
+        }
+        else {
+          $('.quickClone').text('Clone to');
         }
 
         // sort the repo
@@ -184,7 +194,7 @@ function commentOnIssue(repo, oldIssue, newIssue) {
   const urlObj = populateUrlMetadata()
 
   const comment = {
-    body: 'Kamino closed and cloned this issue to ' + urlObj.organization + '/' + repo
+    body: 'Kamino closed and cloned this issue to ' + repo
   }
 
   ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments',
@@ -282,6 +292,15 @@ function addToMostUsed(repo) {
 
     })
   })
+}
+
+function openDropdown() {
+  if ($('.btn-group').hasClass('open')) {
+    $('.btn-group').removeClass('open')
+  }
+  else {
+    $('.btn-group').addClass('open')
+  }
 }
 
 function itemClick(repo) {
