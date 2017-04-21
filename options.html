@@ -29,16 +29,21 @@
 
 
     <div id="tabpages" class="ui-tabs ui-widget ui-widget-content ui-corner-all" style="display: block;">
-       
+
         <div id="ui-tabs-1" class="ui-tabs-panel ui-widget-content ui-corner-bottom" aria-live="polite" aria-labelledby="ui-id-1"
             role="tabpanel" aria-expanded="true" aria-hidden="false">
             <!-- required to help Safari not get confused when injecting this fragment -->
             <div>
                 <h2 id="generaloptions">General Settings</h2>
-                
+
                 <p>
                     <label>GitHub Personal Access Token:</label>
-                    <input type="text" id="github-pat"/>
+                    <input type="text" id="github-pat" />
+                </p>
+
+                <p>
+                    <label>Go to organization's issue list after cloning</label>
+                    <input type="checkbox" id="go-to-issue-list" />
                 </p>
             </div>
 
