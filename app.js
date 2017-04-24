@@ -83,20 +83,45 @@ function loadRepos() {
       // get the current github issue info from the url
       const urlObj = populateUrlMetadata()
 
-      // sort the repo
-      repos = repos.sort((a, b) => a.full_name.localeCompare(b.full_name))
-
-      // remove the repo you're currently on
-      repos = repos.filter((item) => {
-        return item.full_name !== urlObj.currentRepo
-      })
-
       // clear the list each time to avoid duplicates
       $('.repoDropdown').empty()
 
-      repos.forEach((repo) => {
-        $('.repoDropdown').append('<li data-toggle="modal" id="' + repo.name + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repo.full_name + '</a></li>')
-        $('#' + repo.name).bind('click', () => { itemClick(repo.full_name) })
+      // move the items from most used to the top 
+      chrome.storage.sync.get({
+        mostUsed: []
+      }, (item) => {
+        // check for a populated list
+        if (item.mostUsed && item.mostUsed.length > 0) {
+          // add separator header
+          $('.repoDropdown').append('<li class="dropdown-header">Most Used</li>')
+
+          item.mostUsed.forEach((repoFull) => {
+            // remove organization
+            var repo = repoFull.substring(repoFull.indexOf('/') + 1)
+
+            addRepoToList(repoFull, repo)
+
+            // remove the item from the main repos list
+            repos = repos.filter((i) => {
+              return i.full_name !== repoFull
+            })
+          })
+
+          // add separator header
+          $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
+        }
+
+        // sort the repo
+        repos = repos.sort((a, b) => a.full_name.localeCompare(b.full_name))
+
+        // remove the repo you're currently on
+        repos = repos.filter((i) => {
+          return i.name !== urlObj.currentRepo
+        })
+
+        repos.forEach((repo) => {
+          addRepoToList(repo.full_name, repo.name);
+        })
       })
     },
     (error) => {
@@ -193,6 +218,12 @@ function ajaxRequest(type, data, url, successCallback, errorCallback) {
   })
 }
 
+function addRepoToList(repoFullName, repo) {
+  // add the repo to the list
+  $('.repoDropdown').append('<li data-toggle="modal" id="' + repo.replace('.', '_') + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+  $('#' + repo.replace('.', '_')).bind('click', () => { itemClick(repoFullName) })
+}
+
 function populateUrlMetadata() {
   var url = document.location.href
   const urlArray = url.split('/')
@@ -210,7 +241,50 @@ function populateUrlMetadata() {
   return urlObject
 }
 
+function addToMostUsed(repo) {
+  // get
+  chrome.storage.sync.get({
+    mostUsed: []
+  }, (item) => {
+    // find the item
+    if (item.mostUsed.find((e) => { return e === repo }) !== undefined) {
+      // if exists, get index
+      var index = item.mostUsed.indexOf(repo);
+
+      // remove
+      item.mostUsed.splice(index, 1)
+
+      // add to top
+      item.mostUsed.unshift(repo)
+
+      // pop the last if item count is more than 5
+      if (item.mostUsed.length > 5) {
+        item.mostUsed.pop()
+      }
+    }
+    else {
+      // add to top
+      item.mostUsed.unshift(repo)
+
+      // pop the last if item count is more than 5
+      if (item.mostUsed.length > 5) {
+        item.mostUsed.pop()
+      }
+    }
+
+    // save
+    chrome.storage.sync.set({
+      mostUsed: item.mostUsed
+    }, (done) => {
+
+    })
+  })
+}
+
 function itemClick(repo) {
+  // add the item to the most used list
+  addToMostUsed(repo)
+
   $('.cloneNow').attr('data-repo', repo)
   $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.')
   openModal()
