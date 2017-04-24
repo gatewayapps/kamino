@@ -188,11 +188,19 @@ function commentOnIssue(repo, oldIssue, newIssue) {
     (response) => {
       // if success, close the existing issue and open new in a new tab
       closeGithubIssue(oldIssue)
-      window.open('https://github.com/' + repo + '/issues/' + newIssue.number, "_blank")
+
+      goToIssueList(repo, newIssue.number, urlObj.organization, urlObj.currentRepo)
     },
     (error) => {
       console.error(error)
     })
+}
+
+function goToIssueList(repo, issueNumber, org, oldRepo) {
+  // based on user settings, determines if the issues list will open after a clone or not
+  chrome.runtime.sendMessage({ repo: repo, issueNumber: issueNumber, organization: org, oldRepo: oldRepo }, (response) => {
+    console.log(response.farewell)
+  })
 }
 
 function ajaxRequest(type, data, url, successCallback, errorCallback) {
