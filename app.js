@@ -31,6 +31,9 @@ function initializeExtension() {
     $('.gh-header-actions').append(btn)
     $('.gh-header-actions').append(popup)
 
+    // remove the open class just to be sure
+    $('.dropdown').removeClass('open');
+
     // load the token
     chrome.storage.sync.get({
       githubToken: ''
