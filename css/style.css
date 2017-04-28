@@ -1,3 +1,8 @@
+.sidebar-kamino {
+    margin-top:15px;
+    border-top:1px solid #e6ebf1;
+}
+
 .dropdown-menu>li>a {
     display: block;
     padding: 3px 20px;
@@ -52,6 +57,10 @@ a {
 
 .kaminoButton, .quickClone {
     margin: 5px 0 5px 0px !important;
+}
+
+.quickClone {
+    width: 86%;
 }
 
 .open>.dropdown-menu {

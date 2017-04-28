@@ -18,7 +18,7 @@ function initializeExtension() {
   }
 
   // the button
-  const newBtn = $('<div class="TableObject-item btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
+  const newBtn = $('<div class="discussion-sidebar-item sidebar-kamino"><h3 class="discussion-sidebar-heading">Kamino</h3><div class="btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div></div>')
 
   // the modal
   const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
@@ -29,8 +29,8 @@ function initializeExtension() {
   // if the page is not a pull request page and there is no Kamino button in the DOM, proceed
   if (urlObj.url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
     // append button and modal to DOM
-    $('.gh-header-meta').append(newBtn)
-    $('.gh-header-meta').append(popup)
+    $(newBtn).insertAfter($('.sidebar-milestone'))
+    $(popup).insertAfter($('.sidebar-milestone'))
 
     // remove the open class just to be sure
     $('.btn-group').removeClass('open');
@@ -92,7 +92,7 @@ function loadRepos() {
       // clear the list each time to avoid duplicates
       $('.repoDropdown').empty()
 
-      // move the items from most used to the top 
+      // move the items from most used to the top
       chrome.storage.sync.get({
         mostUsed: []
       }, (item) => {
