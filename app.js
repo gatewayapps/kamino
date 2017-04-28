@@ -18,7 +18,7 @@ function initializeExtension() {
   }
 
   // the button
-  const newBtn = $('<div class="TableObject-item btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to ims-shared-client</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
+  const newBtn = $('<div class="TableObject-item btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div>')
 
   // the modal
   const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
@@ -99,7 +99,7 @@ function loadRepos() {
         // check for a populated list
         if (item.mostUsed && item.mostUsed.length > 0) {
           $('.quickClone').attr('data-repo', item.mostUsed[0]);
-          $('.quickClone').text('Clone to ims-shared-core')// + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+          $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
 
           // add separator header
           $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
