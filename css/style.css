@@ -54,6 +54,12 @@ a {
     margin: 5px 0 5px 0px !important;
 }
 
+.quickClone {
+    width: 150px !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 .open>.dropdown-menu {
     display: block;
 }
