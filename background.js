@@ -20,20 +20,25 @@ chrome.runtime.onInstalled.addListener((details) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // get settings
     chrome.storage.sync.get({
-        goToList: false
+        goToList: false,
+        createTab: true
     }, (item) => {
         if (item.goToList) {
             // if user setting is set, open issue list and set focus and open cloned issue in tab
             chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
                 setTimeout(() => {
-                    chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: false })
+                    if(item.createTab) {
+                        chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: false })
+                    }
                     chrome.tabs.update(tabs[0].id, { url: 'https://github.com/' + request.organization + '/' + request.oldRepo + '/issues', selected: true })
                 }, 1000)
             })
         }
         else {
-            // if user setting is not set, open open cloned issue in new tab and set focus to that tab
-            setTimeout(() => { chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: true }) }, 1000)
+            if(item.createTab) {
+                // if user setting is not set, open open cloned issue in new tab and set focus to that tab
+                setTimeout(() => { chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: true }) }, 1000)
+            }
         }
     })
 })
