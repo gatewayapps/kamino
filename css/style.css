@@ -61,6 +61,8 @@ a {
 
 .quickClone {
     width: 86%;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .open>.dropdown-menu {

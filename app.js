@@ -99,7 +99,7 @@ function loadRepos() {
         // check for a populated list
         if (item.mostUsed && item.mostUsed.length > 0) {
           $('.quickClone').attr('data-repo', item.mostUsed[0]);
-          $('.quickClone').text('Clone issue to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+          $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
 
           // add separator header
           $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
