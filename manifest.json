@@ -33,7 +33,7 @@
         "webNavigation",
         "*://github.com/*"
     ],
-    "version": "1.8",
+    "version": "2.0",
     "web_accessible_resources":[
         "icons/*.png",
         "bootstrap/js/bootstrap.min.js",
