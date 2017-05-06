@@ -21,7 +21,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // get settings
     chrome.storage.sync.get({
         goToList: false,
-        createTab: true
+        createTab: true,
+        filters: ''
     }, (item) => {
         if (item.goToList) {
             // if user setting is set, open issue list and set focus and open cloned issue in tab
@@ -30,7 +31,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     if(item.createTab) {
                         chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: false })
                     }
-                    chrome.tabs.update(tabs[0].id, { url: 'https://github.com/' + request.organization + '/' + request.oldRepo + '/issues', selected: true })
+                    chrome.tabs.update(tabs[0].id, { url: 'https://github.com/' + request.organization + '/' + request.oldRepo + '/issues?' + filters, selected: true })
                 }, 1000)
             })
         }
