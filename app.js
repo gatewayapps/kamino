@@ -83,7 +83,6 @@ function saveAppliedFilters(urlObj) {
   if (urlObj.url.indexOf('q=')) {
     // save the filter querystring for when/if we navigate back
     var url = urlObj.url
-    console.log(url)
     var querystring = url.substring(url.indexOf('q='))
 
     chrome.storage.sync.get({
