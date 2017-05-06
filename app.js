@@ -80,7 +80,7 @@ function initializeExtension() {
 
 function saveAppliedFilters(urlObj) {
   // this check should indicate there are applied filters other than the defaults
-  if (urlObj.url.indexOf('&q=')) {
+  if (urlObj.url.indexOf('q=')) {
     // save the filter querystring for when/if we navigate back
     var url = urlObj.url
     console.log(url)
