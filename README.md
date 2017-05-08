@@ -7,12 +7,12 @@ In your Google Chrome browser, simply look for Kamino in the Chrome Extensions s
 
 If you don't know how to create a PAT or need help, check out Creating a token section [here](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)
 
-Once you have your PAT, enter it on the Options screen for Kamino and click `Save`. After that is done, go to any Github issue page in which you are a member and you should see a button labeled `Clone issue to`.
+Once you have your PAT, enter it on the Options screen for Kamino and click `Save`. After that is done, go to any Github issue page in which you are a member and you should see a button labeled `Clone to`.
 
 # Features
 
 ## Normal operations
-Clicking this button will display a dropdown list of repos. Selecting a repo will ask for confirmation about cloning the issue. If you then click `Yes`, the issue will be cloned to the new repository and the original issue will be closed.
+Clicking this button will display a dropdown list of repos. Selecting a repo will ask for confirmation about cloning the issue. If you then click `Yes`, the issue will be cloned to the new repository and the original issue will be closed. There are user settings for opening the new issue in a tab as well as navigating back to the original issue's repository issues list and these things will happen after Kamino has cloned the issue.
 
 ## Last used
 Kamino will remember the last 5 repositories you cloned to so that it will be easy for you to find. If you are someone that is a member of a lot of repos, this should be very handy!
@@ -21,7 +21,7 @@ Kamino will remember the last 5 repositories you cloned to so that it will be ea
 Kamino now supports a quick clone feature. The last repository you cloned to will be shown on a button next to the dropdown. Rather than having to pick the item from the repo list, you can simply click the button to clone to your last used repository!
 
 ### How does it work?
-Kamino leverages the Github API to gather information about the issue you are on. Kamino uses a Chrome Extension utilizing content scripts to create a button on specific web pages.
+Kamino leverages the Github API to gather information about the issue you are on. Kamino is a chrome extension utilizing content scripts to create a button on specific web pages, specifically Github issue pages.
 
 ### Wait a minute, something's not working! Or I'd like to leave feedback
 If you find an issue, feel free to create an issue here. If you think of a way Kamino can be enhanced, also create an issue outlining your feature.
