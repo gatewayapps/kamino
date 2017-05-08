@@ -1,6 +1,5 @@
 .sidebar-kamino {
-    margin-top:15px;
-    border-top:1px solid #e6ebf1;
+    border-bottom:1px solid #e6ebf1;
 }
 
 .dropdown-menu>li>a {
@@ -209,6 +208,7 @@ button.close {
 }
 
 .btn-group, .btn-group-vertical {
+    margin-bottom: 15px;
     position: relative;
     display: inherit;
     vertical-align: middle;
