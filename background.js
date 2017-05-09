@@ -31,11 +31,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     if(item.createTab) {
                         chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: false })
                     }
-                    chrome.tabs.update(tabs[0].id, { url: 'https://github.com/' + request.organization + '/' + request.oldRepo + '/issues?' + filters, selected: true })
+                    chrome.tabs.update(tabs[0].id, { url: 'https://github.com/' + request.organization + '/' + request.oldRepo + '/issues?' + item.filters, selected: true })
                 }, 1000)
             })
         }
         else {
+            console.log('no navigation')
             if(item.createTab) {
                 // if user setting is not set, open open cloned issue in new tab and set focus to that tab
                 setTimeout(() => { chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: true }) }, 1000)

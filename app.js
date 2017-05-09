@@ -80,7 +80,7 @@ function initializeExtension() {
 
 function saveAppliedFilters(urlObj) {
   // this check should indicate there are applied filters other than the defaults
-  if (urlObj.url.indexOf('q=')) {
+  if (urlObj.url.indexOf('q=') > 0) {
     // save the filter querystring for when/if we navigate back
     var url = urlObj.url
     var querystring = url.substring(url.indexOf('q='))
@@ -91,7 +91,7 @@ function saveAppliedFilters(urlObj) {
       if (item.filters !== querystring) {
         chrome.storage.sync.set({
           filters: querystring
-        }, () => { })
+        }, () => { console.log('filters saved') })
       }
     })
   }
@@ -234,7 +234,6 @@ function commentOnIssue(repo, oldIssue, newIssue) {
 function goToIssueList(repo, issueNumber, org, oldRepo) {
   // based on user settings, determines if the issues list will open after a clone or not
   chrome.runtime.sendMessage({ repo: repo, issueNumber: issueNumber, organization: org, oldRepo: oldRepo }, (response) => {
-    console.log(response.farewell)
   })
 }
 
