@@ -79,18 +79,55 @@ function initializeExtension() {
 }
 
 function saveAppliedFilters(urlObj) {
-  // this check should indicate there are applied filters other than the defaults
-  if (urlObj.url.indexOf('q=') > 0) {
+  // check for the appropriate url
+  // url should have /issues and should not track any url that has an issue number at the end
+  if (urlObj.url.indexOf('/issues') > 0 && isNaN(urlObj.issueNumber)) {
     // save the filter querystring for when/if we navigate back
     var url = urlObj.url
-    var querystring = url.substring(url.indexOf('q='))
+    var querystring = url.substring(url.indexOf('/issues'))
+
+    // filter object stores the querystring, the organization and the repo
+    var filter = {
+      filter: querystring,
+      organization: urlObj.organization,
+      currentRepo: urlObj.currentRepo
+    }
 
     chrome.storage.sync.get({
-      filters: ''
+      filters: []
     }, (item) => {
-      if (item.filters !== querystring) {
+      
+      var exists = false;
+      var changed = false;
+
+      // convert the string to an empty array for existing users
+      if(typeof item.filters === 'string') {
+        item.filters = []
+      }
+
+      item.filters.forEach((f) => {
+        // if the storage array contains the org and repo, then set exists flag
+        if (f.organization === filter.organization && f.currentRepo === filter.currentRepo) {
+          exists = true
+
+          // if the querystring value has changed, set the changed flag and update the filter
+          if(f.filter !== filter.filter) {
+            changed = true
+            f.filter = filter.filter
+          }
+        }
+      })
+
+      // if the filter doesn't exist, push to the array and set changed
+      if (!exists) {
+        changed = true
+        item.filters.push(filter)
+      }
+
+      // only save if changed, otherwise the max quota per minute will be exceeded throwing errors
+      if (changed) {
         chrome.storage.sync.set({
-          filters: querystring
+          filters: item.filters
         }, () => { console.log('filters saved') })
       }
     })
@@ -269,8 +306,8 @@ function addRepoToList(repoFullName, repo) {
 function populateUrlMetadata() {
   var url = document.location.href
   const urlArray = url.split('/')
-  const currentRepo = urlArray[urlArray.length - 3]
-  const organization = urlArray[urlArray.length - 4]
+  const currentRepo = urlArray[4]
+  const organization = urlArray[3]
   const issueNumber = urlArray[urlArray.length - 1].replace('#', '')
 
   const urlObject = {
