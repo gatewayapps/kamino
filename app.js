@@ -107,20 +107,16 @@ function getRepos(url) {
       // does the user have more repos
       var linkstring = repos.header.getResponseHeader('Link')
       if (linkstring) {
-        console.log('more links')
         var linkArray = linkstring.split(',')
         linkArray.forEach((link) => {
           if (link.indexOf('rel="next"') > -1) {
             const re = /\<(.*?)\>/
-            console.log('get more repos')
             resolve(getRepos(link.match(re)[1]))
           }
         })
 
-        console.log('done')
         resolve(null)
       } else {
-        console.log('no more links')
         resolve(null)
       }
     })
