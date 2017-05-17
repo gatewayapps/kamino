@@ -3,6 +3,9 @@ var token = ''
 // the backdrop
 var backdrop = $('<div class="kamino-backdrop fade in"></div>');
 
+// repo list
+var repoList = []
+
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
@@ -134,6 +137,29 @@ function saveAppliedFilters(urlObj) {
   }
 }
 
+function getRepos(url) {
+  return new Promise((resolve, reject) => {
+    return ajaxRequest('GET', '', url).then((repos) => {
+      repoList = repoList.concat(repos.data)
+      // does the user have more repos
+      var linkstring = repos.header.getResponseHeader('Link')
+      if (linkstring) {
+        var linkArray = linkstring.split(',')
+        linkArray.forEach((link) => {
+          if (link.indexOf('rel="next"') > -1) {
+            const re = /\<(.*?)\>/
+            resolve(getRepos(link.match(re)[1]))
+          }
+        })
+
+        resolve(null)
+      } else {
+        resolve(null)
+      }
+    })
+  })
+}
+
 function loadRepos() {
   // if there's no personal access token, disable the button
   if (token === '') {
@@ -142,96 +168,80 @@ function loadRepos() {
     $(".quickClone").prop('disabled', true)
   }
 
-  // get a list of repos for the user
-  ajaxRequest('GET', '', 'https://api.github.com/user/repos?per_page=1000',
-    (repos) => {
-      // get the current github issue info from the url
-      const urlObj = populateUrlMetadata()
+  repoList = []
+  const urlObj = populateUrlMetadata()
 
-      // clear the list each time to avoid duplicates
-      $('.repoDropdown').empty()
+  // clear the list each time to avoid duplicates
+  $('.repoDropdown').empty()
 
-      // move the items from most used to the top
-      chrome.storage.sync.get({
-        mostUsed: []
-      }, (item) => {
-        // check for a populated list
-        if (item.mostUsed && item.mostUsed.length > 0) {
-          $('.quickClone').attr('data-repo', item.mostUsed[0]);
-          $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+  getRepos('https://api.github.com/user/repos?per_page=100').then((test) => {
+    // move the items from most used to the top
+    chrome.storage.sync.get({
+      mostUsed: []
+    }, (item) => {
+      // check for a populated list
+      if (item.mostUsed && item.mostUsed.length > 0) {
+        $('.quickClone').attr('data-repo', item.mostUsed[0]);
+        $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
 
-          // add separator header
-          $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
+        // add separator header
+        $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
 
-          item.mostUsed.forEach((repoFull) => {
-            // remove organization
-            var repo = repoFull.substring(repoFull.indexOf('/') + 1)
+        item.mostUsed.forEach((repoFull) => {
+          // remove organization
+          var repo = repoFull.substring(repoFull.indexOf('/') + 1)
 
-            addRepoToList(repoFull, repo)
+          addRepoToList(repoFull, repo)
 
-            // remove the item from the main repos list
-            repos = repos.filter((i) => {
-              return i.full_name !== repoFull
-            })
+          // remove the item from the main repos list
+          repoList = repoList.filter((i) => {
+            return i.full_name !== repoFull
           })
-
-          // add separator header
-          $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
-        }
-        else {
-          $('.quickClone').text('Clone to');
-        }
-
-        // sort the repo
-        repos = repos.sort((a, b) => a.full_name.localeCompare(b.full_name))
-
-        // remove the repo you're currently on
-        repos = repos.filter((i) => {
-          return i.name !== urlObj.currentRepo
         })
 
-        repos.forEach((repo) => {
-          addRepoToList(repo.full_name, repo.name);
-        })
+        // add separator header
+        $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
+      }
+      else {
+        $('.quickClone').text('Clone to');
+      }
+
+      // sort the repo
+      repoList = repoList.sort((a, b) => a.full_name.localeCompare(b.full_name))
+
+      // remove the repo you're currently on
+      repoList = repoList.filter((i) => {
+        return i.name !== urlObj.currentRepo
       })
-    },
-    (error) => {
-      console.error('disabling because get repository request failed')
-      console.error(error)
-      $(".kaminoButton").prop('disabled', true)
-      $(".quickClone").prop('disabled', true)
+
+      repoList.forEach((repo) => {
+        addRepoToList(repo.full_name, repo.name);
+      })
     })
+  })
 }
 
 function getGithubIssue(repo) {
   const urlObj = populateUrlMetadata()
 
-  ajaxRequest('GET', '', 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber,
-    (issue) => {
-      // build new issue
-      const newIssue = {
-        title: issue.title,
-        body: 'From ' + urlObj.currentRepo + ': ' + urlObj.organization + '/' + urlObj.currentRepo + '#' + urlObj.issueNumber + "  \n\n" + issue.body,
-        milestone: issue.milestone,
-        labels: issue.labels
-      }
-      createGithubIssue(newIssue, repo, issue)
-    },
-    (error) => {
-      console.error(error)
-    })
+  ajaxRequest('GET', '', 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber).then((issue) => {
+    // build new issue
+    const newIssue = {
+      title: issue.data.title,
+      body: 'From ' + urlObj.currentRepo + ': ' + urlObj.organization + '/' + urlObj.currentRepo + '#' + urlObj.issueNumber + "  \n\n" + issue.data.body,
+      milestone: issue.data.milestone,
+      labels: issue.data.labels
+    }
+    createGithubIssue(newIssue, repo, issue.data)
+  })
 }
 
 // create the cloned GitHub issue
 function createGithubIssue(newIssue, repo, oldIssue) {
-  ajaxRequest('POST', newIssue, 'https://api.github.com/repos/' + repo + '/issues',
-    (response) => {
-      // add a comment to the closed issue
-      commentOnIssue(repo, oldIssue, response)
-    },
-    (error) => {
-      console.error(error)
-    })
+  ajaxRequest('POST', newIssue, 'https://api.github.com/repos/' + repo + '/issues').then((response) => {
+    // add a comment to the closed issue
+    commentOnIssue(repo, oldIssue, response.data)
+  })
 }
 
 function closeGithubIssue(oldIssue) {
@@ -241,12 +251,8 @@ function closeGithubIssue(oldIssue) {
 
   const urlObj = populateUrlMetadata()
 
-  ajaxRequest('PATCH', issueToClose, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber,
-    (response) => {
-    },
-    (error) => {
-      console.error(error)
-    })
+  ajaxRequest('PATCH', issueToClose, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber).then((done) => {
+  })
 }
 
 function commentOnIssue(repo, oldIssue, newIssue) {
@@ -256,16 +262,11 @@ function commentOnIssue(repo, oldIssue, newIssue) {
     body: 'Kamino closed and cloned this issue to ' + repo
   }
 
-  ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments',
-    (response) => {
-      // if success, close the existing issue and open new in a new tab
-      closeGithubIssue(oldIssue)
-
-      goToIssueList(repo, newIssue.number, urlObj.organization, urlObj.currentRepo)
-    },
-    (error) => {
-      console.error(error)
-    })
+  ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments').then((response) => {
+    // if success, close the existing issue and open new in a new tab
+    closeGithubIssue(oldIssue)
+    goToIssueList(repo, newIssue.number, urlObj.organization, urlObj.currentRepo)
+  })
 }
 
 function goToIssueList(repo, issueNumber, org, oldRepo) {
@@ -274,25 +275,27 @@ function goToIssueList(repo, issueNumber, org, oldRepo) {
   })
 }
 
-function ajaxRequest(type, data, url, successCallback, errorCallback) {
-  chrome.storage.sync.get({
-    githubToken: ''
-  }, (item) => {
-    token = item.githubToken
-    $.ajax({
-      type: type,
-      beforeSend: (request) => {
-        request.setRequestHeader('Authorization', 'token ' + token)
-        request.setRequestHeader('Content-Type', 'application/json')
-      },
-      data: JSON.stringify(data),
-      url: url,
-      success: (response) => {
-        successCallback(response)
-      },
-      error: (err) => {
-        errorCallback(err)
-      }
+function ajaxRequest(type, data, url) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get({
+      githubToken: ''
+    }, (item) => {
+      token = item.githubToken
+      $.ajax({
+        type: type,
+        beforeSend: (request) => {
+          request.setRequestHeader('Authorization', 'token ' + token)
+          request.setRequestHeader('Content-Type', 'application/json')
+        },
+        data: JSON.stringify(data),
+        url: url
+      }).done((data, status, header) => {
+        resolve({
+          data: data,
+          status: status,
+          header: header
+        })
+      })
     })
   })
 }
