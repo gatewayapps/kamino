@@ -100,6 +100,11 @@ function saveAppliedFilters(urlObj) {
       var exists = false;
       var changed = false;
 
+      // convert the string to an empty array for existing users
+      if(typeof item.filters === 'string') {
+        item.filters = []
+      }
+
       item.filters.forEach((f) => {
         // if the storage array contains the org and repo, then set exists flag
         if (f.organization === filter.organization && f.currentRepo === filter.currentRepo) {
