@@ -30,7 +30,9 @@ function initializeExtension() {
   const urlObj = populateUrlMetadata()
 
   // if the page is not a pull request page and there is no Kamino button in the DOM, proceed
-  if (urlObj.url.indexOf('/pull/') < 0 && $('.kaminoButton').length === 0) {
+  if (urlOjb.url.indexOf(url.organization + '/' + url.currentRepo + '/compare/') < 0 && 
+      urlObj.url.indexOf(url.organization + '/' + url.currentRepo + '/pull/') < 0 && 
+      $('.kaminoButton').length === 0) {
     // look for any applied issue filters
     saveAppliedFilters(urlObj)
 
