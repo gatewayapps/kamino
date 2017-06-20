@@ -32,9 +32,9 @@ function initializeExtension() {
   // if the page is not a pull request page(view or create)
   // and the page is not a new issue page
   // and there is no Kamino button in the DOM, proceed
-  if (urlObj.url.indexOf(url.organization + '/' + url.currentRepo + '/compare/') < 0 && 
-      urlObj.url.indexOf(url.organization + '/' + url.currentRepo + '/pull/') < 0 && 
-      urlObj.url.indexOf(url.organization + '/' + url.currentRepo + '/issues/new') < 0 &&
+  if (urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/compare/') < 0 && 
+      urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/pull/') < 0 && 
+      urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/issues/new') < 0 &&
       $('.kaminoButton').length === 0) {
     
     // look for any applied issue filters
