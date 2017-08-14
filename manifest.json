@@ -7,7 +7,9 @@
             ],
             "js": [
                 "jquery/jquery-3.2.0.min.js",
-                "app.js"
+                "handlebars.runtime-v4.0.10.js",
+                "app.js",
+                "template.js"
             ],
             "css": [
                 "css/style.css"
@@ -39,6 +41,8 @@
         "bootstrap/js/bootstrap.min.js",
         "css/*.css",
         "jquery/jquery-3.2.0.min.js",
+        "handlebars.runtim-v4.0.10.js",
+        "template.js",
         "app.js",
         "options.html",
         "options.js",

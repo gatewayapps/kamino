@@ -21,10 +21,11 @@ function initializeExtension() {
   }
 
   // the button
-  const newBtn = $('<div class="sidebar-kamino"><h3 class="discussion-sidebar-heading">Kamino</h3><div class="btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div></div>')
+  const newBtn = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm,""))
 
   // the modal
-  const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneAndClose" style="margin-right:20px;" data-dismiss="modal" data-repo="">Clone and Close</button><button type="button" class="btn btn-primary cloneAndKeepOpen" style="margin-right:20px;" data-dismiss="modal" data-repo="">Just Clone</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">Nevermind</button></div></div></div></div>')
+  const context = {confirmText: 'Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.'}
+  const popup = $(Handlebars.templates.modal(context).replace(/(\r\n|\n|\r)/gm,""))
 
   // get url
   const urlObj = populateUrlMetadata()
