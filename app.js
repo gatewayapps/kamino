@@ -270,7 +270,7 @@ function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
   const comment = {
-    body: 'Kamino closed and cloned this issue to ' + repo
+    body: closeOriginal ? 'Kamino closed and cloned this issue to ' + repo : 'Kamino cloned this issue to ' + repo
   }
 
   ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments').then((response) => {
@@ -390,7 +390,8 @@ function itemClick(repo) {
   // add the item to the most used list
   addToMostUsed(repo)
 
-  $('.cloneNow').attr('data-repo', repo)
+  $('.cloneAndClose').attr('data-repo', repo)
+  $('.cloneAndKeepOpen').attr('data-repo', repo)
   $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? Choose whether to clone and close or clone and keep the original issue open.')
   openModal()
 }
