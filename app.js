@@ -24,7 +24,7 @@ function initializeExtension() {
   const newBtn = $('<div class="sidebar-kamino"><h3 class="discussion-sidebar-heading">Kamino</h3><div class="btn-group"><button type="button" class="btn btn-sm btn-primary quickClone">Clone to</button><button type="button" class="btn btn-sm btn-primary dropdown-toggle kaminoButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu repoDropdown"></ul></div></div>')
 
   // the modal
-  const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? The original issue will be closed.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneNow" style="margin-right:20px;" data-dismiss="modal" data-repo="">Yes</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">No</button></div></div></div></div>')
+  const popup = $('<div id="kaminoModal" class="modal fade" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Kamino - Confirm Clone</h4></div><div class="modal-body"><p class="confirmText">Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.</p></div><div class="modal-footer"><button type="button" class="btn btn-primary cloneAndClose" style="margin-right:20px;" data-dismiss="modal" data-repo="">Clone and Close</button><button type="button" class="btn btn-primary cloneAndKeepOpen" style="margin-right:20px;" data-dismiss="modal" data-repo="">Just Clone</button><button type="button" class="btn btn-info noClone" data-dismiss="modal">Nevermind</button></div></div></div></div>')
 
   // get url
   const urlObj = populateUrlMetadata()
@@ -32,11 +32,11 @@ function initializeExtension() {
   // if the page is not a pull request page(view or create)
   // and the page is not a new issue page
   // and there is no Kamino button in the DOM, proceed
-  if (urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/compare/') < 0 && 
-      urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/pull/') < 0 && 
-      urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/issues/new') < 0 &&
-      $('.kaminoButton').length === 0) {
-    
+  if (urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/compare/') < 0 &&
+    urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/pull/') < 0 &&
+    urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/issues/new') < 0 &&
+    $('.kaminoButton').length === 0) {
+
     // look for any applied issue filters
     saveAppliedFilters(urlObj)
 
@@ -72,9 +72,14 @@ function initializeExtension() {
       }
     })
 
-    $('.cloneNow').click(() => {
+    $('.cloneAndClose').click(() => {
       closeModal()
-      getGithubIssue($('.cloneNow').attr('data-repo'))
+      getGithubIssue($('.cloneAndClose').attr('data-repo'), true)
+    })
+
+    $('.cloneAndKeepOpen').click(() => {
+      closeModal()
+      getGithubIssue($('.cloneAndKeepOpen').attr('data-repo'), false)
     })
 
     $('.close').click(() => {
@@ -105,12 +110,12 @@ function saveAppliedFilters(urlObj) {
     chrome.storage.sync.get({
       filters: []
     }, (item) => {
-      
+
       var exists = false;
       var changed = false;
 
       // convert the string to an empty array for existing users
-      if(typeof item.filters === 'string') {
+      if (typeof item.filters === 'string') {
         item.filters = []
       }
 
@@ -120,7 +125,7 @@ function saveAppliedFilters(urlObj) {
           exists = true
 
           // if the querystring value has changed, set the changed flag and update the filter
-          if(f.filter !== filter.filter) {
+          if (f.filter !== filter.filter) {
             changed = true
             f.filter = filter.filter
           }
@@ -227,7 +232,7 @@ function loadRepos() {
   })
 }
 
-function getGithubIssue(repo) {
+function getGithubIssue(repo, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
   ajaxRequest('GET', '', 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber).then((issue) => {
@@ -238,15 +243,15 @@ function getGithubIssue(repo) {
       milestone: issue.data.milestone,
       labels: issue.data.labels
     }
-    createGithubIssue(newIssue, repo, issue.data)
+    createGithubIssue(newIssue, repo, issue.data, closeOriginal)
   })
 }
 
 // create the cloned GitHub issue
-function createGithubIssue(newIssue, repo, oldIssue) {
+function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
   ajaxRequest('POST', newIssue, 'https://api.github.com/repos/' + repo + '/issues').then((response) => {
     // add a comment to the closed issue
-    commentOnIssue(repo, oldIssue, response.data)
+    commentOnIssue(repo, oldIssue, response.data, closeOriginal)
   })
 }
 
@@ -261,7 +266,7 @@ function closeGithubIssue(oldIssue) {
   })
 }
 
-function commentOnIssue(repo, oldIssue, newIssue) {
+function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
   const comment = {
@@ -269,8 +274,11 @@ function commentOnIssue(repo, oldIssue, newIssue) {
   }
 
   ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments').then((response) => {
-    // if success, close the existing issue and open new in a new tab
-    closeGithubIssue(oldIssue)
+
+    if (closeOriginal) {
+      // if success, close the existing issue and open new in a new tab
+      closeGithubIssue(oldIssue)
+    }
     goToIssueList(repo, newIssue.number, urlObj.organization, urlObj.currentRepo)
   })
 }
@@ -383,7 +391,7 @@ function itemClick(repo) {
   addToMostUsed(repo)
 
   $('.cloneNow').attr('data-repo', repo)
-  $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? The original issue will be closed.')
+  $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? Choose whether to clone and close or clone and keep the original issue open.')
   openModal()
 }
 
