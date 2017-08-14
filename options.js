@@ -18,6 +18,10 @@ function save_options() {
   });
 }
 
+function paypal_donate() {
+  window.open('https://www.paypal.me/johnmurphy01', '_blank');
+}
+
 // Restores options
 function restore_options() {
   chrome.storage.sync.get({
@@ -34,3 +38,5 @@ function restore_options() {
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('saveButton').addEventListener('click',
     save_options);
+document.getElementById('paypal-button').addEventListener('click',
+    paypal_donate);

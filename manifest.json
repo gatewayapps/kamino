@@ -24,7 +24,7 @@
     "icons": {
         "128": "icons/storm-trooper-128.png"
     },
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "content_security_policy": "script-src 'self' https://code.jquery.com/jquery-3.2.1.min.js https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js 'unsafe-eval'; object-src 'self';",
     "manifest_version": 2,
     "name": "Kamino",
     "options_page": "options.html",

@@ -4,6 +4,7 @@
 <head>
     <title>Kamino Settings</title>
     <link rel="stylesheet" href="css/options.css">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 </head>
 
 <body>
@@ -15,7 +16,7 @@
                         <a class="feedback" href="https://github.com/gatewayapps/kamino" target="_blank"></a>
                     </li>
                     <li class="social">
-                        <a class="twitter" href="http://twitter.com/gatewayappdevs" target="_blank"></a>
+                        <a class="twitter" href="http://twitter.com/johnmurphy01" target="_blank"></a>
                     </li>
                     <li class="social">
                         <a class="facebook" href="http://facebook.com/gatewayapps" target="_blank"></a>
@@ -28,37 +29,38 @@
     </header>
 
 
-    <div id="tabpages" class="ui-tabs ui-widget ui-widget-content ui-corner-all" style="display: block;">
+    <div id="tabpages" style="display: block;">
 
-        <div id="ui-tabs-1" class="ui-tabs-panel ui-widget-content ui-corner-bottom" aria-live="polite" aria-labelledby="ui-id-1"
-            role="tabpanel" aria-expanded="true" aria-hidden="false">
-            <!-- required to help Safari not get confused when injecting this fragment -->
+        <div id="ui-tabs-1" class="ui-tabs-panel">
             <div>
                 <h2 id="generaloptions">General Settings</h2>
 
-                <p>
-                    <label>GitHub Personal Access Token:</label>
-                    <input type="text" id="github-pat" />
-                </p>
+                <div>
+                    <input class="input-lg" type="text" id="github-pat" size="50" placeholder="Github Personal Access Token" />
+                </div>
 
-                <p>
-                    <label>Go to organization's issue list after cloning</label>
-                    <input type="checkbox" id="go-to-issue-list" />
-                </p>
+                <div class="checkbox">
+                    <label><input type="checkbox" id="go-to-issue-list">Go to organization's issue list after cloning</label>
+                </div>
                 
-                <p>
-                    <label>Create tab for cloned issue</label>
-                    <input type="checkbox" id="create-tab" />
-                </p>
+                <div class="checkbox">
+                    <label><input type="checkbox" id="create-tab">Create tab for cloned issue</label>
+                </div>
             </div>
 
             <p>
-                <button id="saveButton" class="saveButton">Save</button>
+                <button id="saveButton" class="saveButton btn btn-primary"><strong>Save</strong></button>
                 <label id="status"></label>
             </p>
+
+            <div style="margin-top:30px;">
+                <div><strong>Donate if you like this extension!</strong></div><div id="paypal-button"></div>
+            </div>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="options.js"></script>
 </body>
 
