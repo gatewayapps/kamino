@@ -1,7 +1,7 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['button'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<div class=\"sidebar-kamino\">\r\n    <h3 class=\"discussion-sidebar-heading\">Kamino</h3>\r\n    <div class=\"btn-group\">\r\n        <button type=\"button\" class=\"btn btn-sm btn-primary quickClone\">Clone to</button>\r\n        <button type=\"button\" class=\"btn btn-sm btn-primary dropdown-toggle kaminoButton\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\r\n            <span class=\"caret\"></span>\r\n            <span class=\"sr-only\">Toggle Dropdown</span>\r\n        </button>\r\n        <ul class=\"dropdown-menu repoDropdown\"></ul>\r\n    </div>\r\n</div>";
+    return "<div class=\"sidebar-kamino\">\r\n    <h3 class=\"discussion-sidebar-heading\">Kamino</h3>\r\n    <div class=\"btn-group\" role=\"group\">\r\n        <button type=\"button\" class=\"btn btn-sm btn-primary quickClone\">Clone to</button>\r\n        <button type=\"button\" class=\"btn btn-sm btn-primary dropdown-toggle kaminoButton\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\r\n            <span class=\"caret\"></span>\r\n            <span class=\"sr-only\">Toggle Dropdown</span>\r\n        </button>\r\n        <ul class=\"dropdown-menu repoDropdown\"></ul>\r\n    </div>\r\n</div>";
 },"useData":true});
 templates['modal'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper;
