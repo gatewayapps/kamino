@@ -241,9 +241,9 @@ function getGithubIssue(repo, closeOriginal) {
     const newIssue = {
       title: issue.data.title,
       body: 'From ' + urlObj.currentRepo + ' created by [' + issue.data.user.login + '](' + issue.data.user.html_url + ') : ' + urlObj.organization + '/' + urlObj.currentRepo + '#' + urlObj.issueNumber + "  \n\n" + issue.data.body,
-      milestone: issue.data.milestone,
       labels: issue.data.labels
     }
+
     createGithubIssue(newIssue, repo, issue.data, closeOriginal)
   })
 }
