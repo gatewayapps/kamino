@@ -317,8 +317,10 @@ function ajaxRequest(type, data, url) {
 
 function addRepoToList(repoFullName, repo) {
   // add the repo to the list
-  $('.repoDropdown').append('<li data-toggle="modal" id="' + repo.replace('.', '_') + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
-  $('#' + repo.replace('.', '_')).bind('click', () => { itemClick(repoFullName) })
+  const periodReplace = repo.replace(/\./g, '_')
+
+  $('.repoDropdown').append('<li data-toggle="modal" id="' + periodReplace + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+  $('#' + periodReplace).bind('click', () => { itemClick(repoFullName) })
 }
 
 function populateUrlMetadata() {
