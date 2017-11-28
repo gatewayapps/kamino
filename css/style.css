@@ -36,7 +36,7 @@ a {
     z-index: 1000;
     display: none;
     float: left;
-    min-width: 260px;
+    min-width: 280px;
     height: 300px;
     overflow-y: auto;
     overflow-x: hidden;
