@@ -390,7 +390,6 @@ function openDropdown() {
 }
 
 function itemClick(repo) {
-  console.log('item clicked: ' + repo)
   // add the item to the most used list
   addToMostUsed(repo)
 
