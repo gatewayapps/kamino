@@ -221,11 +221,6 @@ function loadRepos() {
       // sort the repo
       repoList = repoList.sort((a, b) => a.full_name.localeCompare(b.full_name))
 
-      // remove the repo you're currently on
-      repoList = repoList.filter((i) => {
-        return i.name !== urlObj.currentRepo
-      })
-
       repoList.forEach((repo) => {
         addRepoToList(repo.full_name, repo.name);
       })
