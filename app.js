@@ -150,28 +150,28 @@ function saveAppliedFilters(urlObj) {
 }
 
 function getRepos(url) {
-  return new Promise((resolve, reject) => {
-    return ajaxRequest('GET', '', url).then((repos) => {
-      repoList = repoList.concat(repos.data)
-      // does the user have more repos
-      var linkstring = repos.header.getResponseHeader('Link')
-      if (linkstring) {
-        var linkArray = linkstring.split(',')
-        var promises = []
-        linkArray.forEach((link) => {
-          if (link.indexOf('rel="next"') > -1) {
-            const re = /\<(.*?)\>/
-            promises.push(getRepos(link.match(re)[1]))
-          }
-        })
+  return ajaxRequest('GET', '', url).then((repos) => {
+    repoList = repoList.concat(repos.data)
+    // does the user have more repos
+    var linkstring = repos.header.getResponseHeader('Link')
+    if (linkstring) {
+      var nextLink = undefined
+      var linkArray = linkstring.split(',')
+      linkArray.forEach((link) => {
+        if (link.indexOf('rel="next"') > -1) {
+          const re = /\<(.*?)\>/
+          nextLink = link.match(re)[1]
+        }
+      })
 
-        return Promise.all(promises).then(() => {
-          resolve(null)
-        })
+      if(nextLink) {
+        return getRepos(nextLink)
       } else {
-        resolve(null)
+        return null
       }
-    })
+    } else {
+      return null
+    }
   })
 }
 
@@ -250,9 +250,6 @@ function compileRepositoryList(list, searchTerm) {
     else {
       $('.quickClone').text('Clone to');
     }
-
-    // sort the repo
-    list = list.sort((a, b) => a.full_name.localeCompare(b.full_name))
 
     list.forEach((repo) => {
       addRepoToList(repo.full_name, repo.name);
