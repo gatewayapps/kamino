@@ -173,6 +173,21 @@ function getRepos(url) {
 }
 
 function loadRepos() {
+  // wire up search value change events
+  var lastValue = '';
+  $(".repoSearch").on('change keyup paste mouseup', function() {
+      if ($(this).val() != lastValue) {
+          lastValue = $(this).val()
+          searchRepositories(lastValue)
+      }
+  })
+
+  // create a way to go to options without using the extension context menu
+  $(".kamino-heading").click(() => {
+    chrome.runtime.sendMessage({ action:'goToOptions' }, (response) => {
+    })
+  })
+
   // if there's no personal access token, disable the button
   if (token === '') {
     console.log('disabling button because there is no Personal Access Token for authentication with Github')
@@ -188,44 +203,69 @@ function loadRepos() {
 
   getRepos('https://api.github.com/user/repos?per_page=100').then((test) => {
     // move the items from most used to the top
-    chrome.storage.sync.get({
-      mostUsed: []
-    }, (item) => {
-      // check for a populated list
-      if (item.mostUsed && item.mostUsed.length > 0) {
-        $('.quickClone').attr('data-repo', item.mostUsed[0]);
-        $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+    compileRepositoryList(repoList)
+  })
+}
 
-        // add separator header
-        $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
+function compileRepositoryList(list, searchTerm) {
+  chrome.storage.sync.get({
+    mostUsed: []
+  }, (item) => {
+    // check for a populated list
+    if (item.mostUsed && item.mostUsed.length > 0) {
+      $('.quickClone').attr('data-repo', item.mostUsed[0]);
+      $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
 
-        item.mostUsed.forEach((repoFull) => {
-          // remove organization
-          var repo = repoFull.substring(repoFull.indexOf('/') + 1)
+      // add separator header
+      $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
 
-          addRepoToList(repoFull, repo)
+      var mostUsed = item.mostUsed
 
-          // remove the item from the main repos list
-          repoList = repoList.filter((i) => {
-            return i.full_name !== repoFull
-          })
+      // filter out most used by search term
+      if(searchTerm && searchTerm !== '') {
+        console.log('filtering most used: ', searchTerm)
+        mostUsed = item.mostUsed.filter((item, index) => {
+          return item.indexOf(searchTerm) > -1
         })
-
-        // add separator header
-        $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
-      }
-      else {
-        $('.quickClone').text('Clone to');
       }
 
-      // sort the repo
-      repoList = repoList.sort((a, b) => a.full_name.localeCompare(b.full_name))
+      mostUsed.forEach((repoFull) => {
+        // remove organization
+        var repo = repoFull.substring(repoFull.indexOf('/') + 1)
 
-      repoList.forEach((repo) => {
-        addRepoToList(repo.full_name, repo.name);
+        addRepoToList(repoFull, repo)
+
+        // remove the item from the main repos list
+        list = list.filter((i) => {
+          return i.full_name !== repoFull
+        })
       })
+
+      // add separator header
+      $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
+    }
+    else {
+      $('.quickClone').text('Clone to');
+    }
+
+    // sort the repo
+    list = list.sort((a, b) => a.full_name.localeCompare(b.full_name))
+
+    list.forEach((repo) => {
+      addRepoToList(repo.full_name, repo.name);
     })
   })
+}
+
+function searchRepositories(searchTerm) {
+  // first look for any already loaded values in the repo dropdown
+  var matches = repoList.filter((item, index) => {
+    return item.full_name.indexOf(searchTerm) > -1
+  })
+
+  $(".repoDropdown").empty()
+
+  compileRepositoryList(matches, searchTerm)
 }
 
 function getGithubIssue(repo, closeOriginal) {
