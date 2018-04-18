@@ -157,14 +157,17 @@ function getRepos(url) {
       var linkstring = repos.header.getResponseHeader('Link')
       if (linkstring) {
         var linkArray = linkstring.split(',')
+        var promises = []
         linkArray.forEach((link) => {
           if (link.indexOf('rel="next"') > -1) {
             const re = /\<(.*?)\>/
-            resolve(getRepos(link.match(re)[1]))
+            promises.push(getRepos(link.match(re)[1]))
           }
         })
 
-        resolve(null)
+        return Promise.all(promises).then(() => {
+          resolve(null)
+        })
       } else {
         resolve(null)
       }
