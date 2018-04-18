@@ -25,6 +25,9 @@ Kamino will remember the last 5 repositories you cloned to so that it will be ea
 ## Quick clone
 Kamino now supports a quick clone feature. The last repository you cloned to will be shown on a button next to the dropdown. Rather than having to pick the item from the repo list, you can simply click the button to clone to your last used repository!
 
+## Search a Repository
+For those who have a large number of repositories, Kamino has now introduced a search feature. This can be used to filter the list of repositories quickly. Thanks to [@CamSoper](https://github.com/CamSoper) for the request!
+
 ### How does it work?
 Kamino leverages the Github API to gather information about the issue you are on. Kamino is a chrome extension utilizing content scripts to create a button on specific web pages, specifically Github issue pages.
 
