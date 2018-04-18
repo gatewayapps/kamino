@@ -29,6 +29,14 @@ a {
     content:none !important;
 }
 
+.dropdown-header-used, .dropdown-header-rest {
+    display:none;
+}
+
+.dropdown-header-used.active, .dropdown-header-rest.active {
+    display:inline;
+}
+
 .repoSearch {
     width:95%; 
     margin-left:5px; 
