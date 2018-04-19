@@ -150,29 +150,49 @@ function saveAppliedFilters(urlObj) {
 }
 
 function getRepos(url) {
-  return new Promise((resolve, reject) => {
-    return ajaxRequest('GET', '', url).then((repos) => {
-      repoList = repoList.concat(repos.data)
-      // does the user have more repos
-      var linkstring = repos.header.getResponseHeader('Link')
-      if (linkstring) {
-        var linkArray = linkstring.split(',')
-        linkArray.forEach((link) => {
-          if (link.indexOf('rel="next"') > -1) {
-            const re = /\<(.*?)\>/
-            resolve(getRepos(link.match(re)[1]))
-          }
-        })
+  return ajaxRequest('GET', '', url).then((repos) => {
+    repoList = repoList.concat(repos.data)
+    // does the user have more repos
+    var linkstring = repos.header.getResponseHeader('Link')
+    if (linkstring) {
+      var nextLink = undefined
+      var linkArray = linkstring.split(',')
+      linkArray.forEach((link) => {
+        if (link.indexOf('rel="next"') > -1) {
+          const re = /\<(.*?)\>/
+          nextLink = link.match(re)[1]
+        }
+      })
 
-        resolve(null)
+      compileRepositoryList(repos.data)
+
+      if(nextLink) {
+        return getRepos(nextLink)
       } else {
-        resolve(null)
+        return null
       }
-    })
+    } else {
+      return null
+    }
   })
 }
 
 function loadRepos() {
+  // wire up search value change events
+  var lastValue = '';
+  $(".repoSearch").on('change keyup paste mouseup', function() {
+      if ($(this).val() != lastValue) {
+          lastValue = $(this).val()
+          searchRepositories(lastValue)
+      }
+  })
+
+  // create a way to go to options without using the extension context menu
+  $(".kamino-heading").click(() => {
+    chrome.runtime.sendMessage({ action:'goToOptions' }, (response) => {
+    })
+  })
+
   // if there's no personal access token, disable the button
   if (token === '') {
     console.log('disabling button because there is no Personal Access Token for authentication with Github')
@@ -186,46 +206,84 @@ function loadRepos() {
   // clear the list each time to avoid duplicates
   $('.repoDropdown').empty()
 
-  getRepos('https://api.github.com/user/repos?per_page=100').then((test) => {
-    // move the items from most used to the top
-    chrome.storage.sync.get({
-      mostUsed: []
-    }, (item) => {
-      // check for a populated list
-      if (item.mostUsed && item.mostUsed.length > 0) {
-        $('.quickClone').attr('data-repo', item.mostUsed[0]);
-        $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+  // add separator headers
+  $('.repoDropdown').append('<li class="dropdown-header dropdown-header-used">Last Used</li>')
+  $('.repoDropdown').append('<li class="dropdown-header dropdown-header-rest">The Rest</li>')
 
-        // add separator header
-        $('.repoDropdown').append('<li class="dropdown-header">Last Used</li>')
+  getRepos('https://api.github.com/user/repos?per_page=100').then(() => {
+  })
+}
 
-        item.mostUsed.forEach((repoFull) => {
-          // remove organization
-          var repo = repoFull.substring(repoFull.indexOf('/') + 1)
+function compileRepositoryList(list, searchTerm) {
+  chrome.storage.sync.get({
+    mostUsed: []
+  }, (item) => {
+    // check for a populated list
+    if (item.mostUsed && item.mostUsed.length > 0) {
+      $('.quickClone').attr('data-repo', item.mostUsed[0]);
+      $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
 
-          addRepoToList(repoFull, repo)
+      // show used separator header
+      $('.dropdown-header-used').addClass('active')
 
-          // remove the item from the main repos list
-          repoList = repoList.filter((i) => {
-            return i.full_name !== repoFull
-          })
+      var mostUsed = item.mostUsed
+
+      // filter out most used by search term
+      if(searchTerm && searchTerm !== '') {
+        console.log('filtering most used: ', searchTerm)
+        mostUsed = item.mostUsed.filter((item, index) => {
+          return item.indexOf(searchTerm) > -1
         })
-
-        // add separator header
-        $('.repoDropdown').append('<li class="dropdown-header">The Rest</li>')
-      }
-      else {
-        $('.quickClone').text('Clone to');
       }
 
-      // sort the repo
-      repoList = repoList.sort((a, b) => a.full_name.localeCompare(b.full_name))
+      // hide header if there are no last used items
+      if(!mostUsed || mostUsed.length === 0) {
+        $('.dropdown-header-used').removeClass('active')
+      }
 
-      repoList.forEach((repo) => {
-        addRepoToList(repo.full_name, repo.name);
+      mostUsed.forEach((repoFull) => {
+        // remove organization
+        var repo = repoFull.substring(repoFull.indexOf('/') + 1)
+
+        addRepoToList(repoFull, repo, 'used')
+
+        // remove the item from the main repos list
+        list = list.filter((i) => {
+          return i.full_name !== repoFull
+        })
       })
+    }
+    else {
+      $('.dropdown-header-used').removeClass('active')
+      $('.quickClone').text('Clone to');
+    }
+
+    // show or hide rest header based on number of items
+    if(!list || list.length === 0) {
+      $('.dropdown-header-rest').removeClass('active')
+    } else {
+      $('.dropdown-header-rest').addClass('active')
+    }
+
+    list.forEach((repo) => {
+      addRepoToList(repo.full_name, repo.name);
     })
   })
+}
+
+function searchRepositories(searchTerm) {
+  // first look for any already loaded values in the repo dropdown
+  var matches = repoList.filter((item, index) => {
+    return item.full_name.indexOf(searchTerm) > -1
+  })
+
+  // remove all items that are not a dropdown header
+  // and hide headers
+  $('.repoDropdown :not(.dropdown-header)').remove()
+  $('.dropdown-header-used').removeClass('active')
+  $('.dropdown-header-rest').removeClass('active')
+
+  compileRepositoryList(matches, searchTerm)
 }
 
 function getGithubIssue(repo, closeOriginal) {
@@ -310,11 +368,19 @@ function ajaxRequest(type, data, url) {
   })
 }
 
-function addRepoToList(repoFullName, repo) {
+function addRepoToList(repoFullName, repo, section) {
   // add the repo to the list
   const periodReplace = repo.replace(/\./g, '_')
 
-  $('.repoDropdown').append('<li data-toggle="modal" id="' + periodReplace + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+  // determine where the item needs to go
+  if(section === 'used') {
+    if($('#' + periodReplace).length === 0) {
+      $('.dropdown-header-rest').before('<li data-toggle="modal" id="' + periodReplace + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+    }
+  } else {
+    $('.repoDropdown').append('<li data-toggle="modal" id="' + periodReplace + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+  }
+
   $('#' + periodReplace).bind('click', () => { itemClick(repoFullName) })
 }
 
