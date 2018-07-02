@@ -322,9 +322,9 @@ function closeGithubIssue(oldIssue) {
 
 function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
   const urlObj = populateUrlMetadata()
-
+  const newIssueLink = '[' + repo + ']' + '(' + newIssue.html_url + ')'
   const comment = {
-    body: closeOriginal ? 'Kamino closed and cloned this issue to ' + repo : 'Kamino cloned this issue to ' + repo
+    body: closeOriginal ? 'Kamino closed and cloned this issue to ' +  newIssueLink: 'Kamino cloned this issue to ' + newIssueLink
   }
 
   ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments').then((response) => {
