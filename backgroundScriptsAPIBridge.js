@@ -96,11 +96,11 @@ class EdgeBridgeDebugLog {
             result = action();
             this.AddToCalledDictionary(this.SuccededCalls, name);
             if (typeof deprecatedTo !== "undefined" && typeof deprecatedTo !== "null") {
-                this.warn("API Call Deprecated - Name: " + name + ", Please use " + deprecatedTo + " instead!");
+                this.warn(`API Call Deprecated - Name: ${name}, Please use ${deprecatedTo} instead!"`);
                 this.AddToCalledDictionary(this.DeprecatedCalls, name);
             }
             if (typeof bridgedTo !== "undefined" && typeof bridgedTo !== "null") {
-                this.info("API Call '" + name + "' has been bridged to another Edge API: " + bridgedTo);
+                this.info(`API Call '${name}' has been bridged to another Edge API: ${bridgedTo}`);
                 this.AddToCalledDictionary(this.BridgedCalls, name);
             }
             return result;
@@ -108,7 +108,7 @@ class EdgeBridgeDebugLog {
         catch (ex) {
             this.AddToCalledDictionary(this.FailedCalls, name);
             if (this.CatchOnException)
-                this.error("API Call Failed: " + name + " - " + ex);
+                this.error(`API Call Failed: ${name} - ${ex}`);
             else
                 throw ex;
         }
@@ -118,10 +118,10 @@ class EdgeBridgeDebugLog {
         this.AddToCalledDictionary(this.EdgeIssues, name);
     }
     LogUnavailbleApi(name, deprecatedTo) {
-        this.warn("API Call '" + name + "' is not supported in Edge");
+        this.warn(`API Call '${name}' is not supported in Edge"`);
         this.AddToCalledDictionary(this.UnavailableApis, name);
         if (typeof deprecatedTo !== "undefined" && typeof deprecatedTo !== "null") {
-            this.warn("API Call Deprecated - Name: " + name + ", Please use " + deprecatedTo + " instead!");
+            this.warn(`API Call Deprecated - Name: ${name}, Please use ${deprecatedTo} instead!`);
             this.AddToCalledDictionary(this.DeprecatedCalls, name);
         }
     }
