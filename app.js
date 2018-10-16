@@ -21,11 +21,11 @@ function initializeExtension() {
   }
 
   // the button
-  const newBtn = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm,""))
+  const newBtn = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm, ""))
 
   // the modal
-  const context = {confirmText: 'Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.'}
-  const popup = $(Handlebars.templates.modal(context).replace(/(\r\n|\n|\r)/gm,""))
+  const context = { confirmText: 'Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.' }
+  const popup = $(Handlebars.templates.modal(context).replace(/(\r\n|\n|\r)/gm, ""))
 
   // get url
   const urlObj = populateUrlMetadata()
@@ -33,10 +33,10 @@ function initializeExtension() {
   // if the page is not a pull request page(view or create)
   // and the page is not a new issue page
   // and there is no Kamino button in the DOM, proceed
-  if (urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/compare/') < 0 &&
-    urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/pull/') < 0 &&
-    urlObj.url.indexOf(urlObj.organization + '/' + urlObj.currentRepo + '/issues/new') < 0 &&
-    $('.kaminoButton').length === 0) {
+  if (urlObj.url.indexOf`(${urlObj.organization}/${urlObj.currentRepo}/compare/`) < 0 &&
+    urlObj.url.indexOf`(${urlObj.organization}/${urlObj.currentRepo}/pull/`) < 0 &&
+      urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/issues/new`) < 0 &&
+      $('.kaminoButton').length === 0) {
 
     // look for any applied issue filters
     saveAppliedFilters(urlObj)
@@ -166,7 +166,7 @@ function getRepos(url) {
 
       compileRepositoryList(repos.data)
 
-      if(nextLink) {
+      if (nextLink) {
         return getRepos(nextLink)
       } else {
         return null
@@ -180,16 +180,16 @@ function getRepos(url) {
 function loadRepos() {
   // wire up search value change events
   var lastValue = '';
-  $(".repoSearch").on('change keyup paste mouseup', function() {
-      if ($(this).val() != lastValue) {
-          lastValue = $(this).val()
-          searchRepositories(lastValue)
-      }
+  $(".repoSearch").on('change keyup paste mouseup', function () {
+    if ($(this).val() != lastValue) {
+      lastValue = $(this).val()
+      searchRepositories(lastValue)
+    }
   })
 
   // create a way to go to options without using the extension context menu
   $(".kamino-heading").click(() => {
-    chrome.runtime.sendMessage({ action:'goToOptions' }, (response) => {
+    chrome.runtime.sendMessage({ action: 'goToOptions' }, (response) => {
     })
   })
 
@@ -221,7 +221,7 @@ function compileRepositoryList(list, searchTerm) {
     // check for a populated list
     if (item.mostUsed && item.mostUsed.length > 0) {
       $('.quickClone').attr('data-repo', item.mostUsed[0]);
-      $('.quickClone').text('Clone to ' + item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1))
+      $('.quickClone').text(`Clone to ${item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1)}`)
 
       // show used separator header
       $('.dropdown-header-used').addClass('active')
@@ -229,7 +229,7 @@ function compileRepositoryList(list, searchTerm) {
       var mostUsed = item.mostUsed
 
       // filter out most used by search term
-      if(searchTerm && searchTerm !== '') {
+      if (searchTerm && searchTerm !== '') {
         console.log('filtering most used: ', searchTerm)
         mostUsed = item.mostUsed.filter((item, index) => {
           return item.indexOf(searchTerm) > -1
@@ -237,7 +237,7 @@ function compileRepositoryList(list, searchTerm) {
       }
 
       // hide header if there are no last used items
-      if(!mostUsed || mostUsed.length === 0) {
+      if (!mostUsed || mostUsed.length === 0) {
         $('.dropdown-header-used').removeClass('active')
       }
 
@@ -259,7 +259,7 @@ function compileRepositoryList(list, searchTerm) {
     }
 
     // show or hide rest header based on number of items
-    if(!list || list.length === 0) {
+    if (!list || list.length === 0) {
       $('.dropdown-header-rest').removeClass('active')
     } else {
       $('.dropdown-header-rest').addClass('active')
@@ -289,11 +289,11 @@ function searchRepositories(searchTerm) {
 function getGithubIssue(repo, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
-  ajaxRequest('GET', '', 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber).then((issue) => {
+  ajaxRequest('GET', '', `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`).then((issue) => {
     // build new issue
     const newIssue = {
       title: issue.data.title,
-      body: 'From ' + urlObj.currentRepo + ' created by [' + issue.data.user.login + '](' + issue.data.user.html_url + ') : ' + urlObj.organization + '/' + urlObj.currentRepo + '#' + urlObj.issueNumber + "  \n\n" + issue.data.body,
+      body: `From ${urlObj.currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}  \n\n${issue.data.body}`,
       labels: issue.data.labels
     }
 
@@ -303,7 +303,7 @@ function getGithubIssue(repo, closeOriginal) {
 
 // create the cloned GitHub issue
 function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
-  ajaxRequest('POST', newIssue, 'https://api.github.com/repos/' + repo + '/issues').then((response) => {
+  ajaxRequest('POST', newIssue, `https://api.github.com/repos/${repo}/issues`).then((response) => {
     // add a comment to the closed issue
     commentOnIssue(repo, oldIssue, response.data, closeOriginal)
   })
@@ -316,18 +316,18 @@ function closeGithubIssue(oldIssue) {
 
   const urlObj = populateUrlMetadata()
 
-  ajaxRequest('PATCH', issueToClose, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber).then((done) => {
+  ajaxRequest('PATCH', issueToClose, `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`).then((done) => {
   })
 }
 
 function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
   const urlObj = populateUrlMetadata()
-  const newIssueLink = '[' + repo + ']' + '(' + newIssue.html_url + ')'
+  const newIssueLink = `[${repo}](${newIssue.html_url})`
   const comment = {
-    body: closeOriginal ? 'Kamino closed and cloned this issue to ' +  newIssueLink: 'Kamino cloned this issue to ' + newIssueLink
+    body: closeOriginal ? `Kamino closed and cloned this issue to ${newIssueLink}` : `Kamino cloned this issue to ${newIssueLink}`
   }
 
-  ajaxRequest('POST', comment, 'https://api.github.com/repos/' + urlObj.organization + '/' + urlObj.currentRepo + '/issues/' + urlObj.issueNumber + '/comments').then((response) => {
+  ajaxRequest('POST', comment, `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments`).then((response) => {
 
     if (closeOriginal) {
       // if success, close the existing issue and open new in a new tab
@@ -352,7 +352,7 @@ function ajaxRequest(type, data, url) {
       $.ajax({
         type: type,
         beforeSend: (request) => {
-          request.setRequestHeader('Authorization', 'token ' + token)
+          request.setRequestHeader('Authorization', `token ${token}`)
           request.setRequestHeader('Content-Type', 'application/json')
         },
         data: JSON.stringify(data),
@@ -373,15 +373,15 @@ function addRepoToList(repoFullName, repo, section) {
   const periodReplace = repo.replace(/\./g, '_')
 
   // determine where the item needs to go
-  if(section === 'used') {
-    if($('#' + periodReplace).length === 0) {
-      $('.dropdown-header-rest').before('<li data-toggle="modal" id="' + periodReplace + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+  if (section === 'used') {
+    if ($(`#${periodReplace}`).length === 0) {
+      $('.dropdown-header-rest').before(`<li data-toggle="modal" id="${periodReplace}" data-target="#kaminoModal"><a class="repoItem" href="#">${repoFullName}</a></li>`)
     }
   } else {
-    $('.repoDropdown').append('<li data-toggle="modal" id="' + periodReplace + '" data-target="#kaminoModal"><a class="repoItem" href="#">' + repoFullName + '</a></li>')
+    $('.repoDropdown').append(`<li data-toggle="modal" id="${periodReplace}" data-target="#kaminoModal"><a class="repoItem" href="#">${repoFullName}</a></li>`)
   }
 
-  $('#' + periodReplace).bind('click', () => { itemClick(repoFullName) })
+  $(`#${periodReplace}`).bind('click', () => { itemClick(repoFullName) })
 }
 
 function populateUrlMetadata() {
@@ -456,7 +456,7 @@ function itemClick(repo) {
 
   $('.cloneAndClose').attr('data-repo', repo)
   $('.cloneAndKeepOpen').attr('data-repo', repo)
-  $('.confirmText').text('Are you sure you want to clone this issue to ' + repo + '? Choose whether to clone and close or clone and keep the original issue open.')
+  $('.confirmText').text(`Are you sure you want to clone this issue to ${repo}? Choose whether to clone and close or clone and keep the original issue open.`)
   openModal()
 }
 
