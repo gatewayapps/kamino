@@ -22,9 +22,9 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 // listen for tab change requests
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if(request.action && request.action === 'goToOptions') {
+    if (request.action && request.action === 'goToOptions') {
         // open the options screen in a new tab
-        chrome.tabs.create({ url: 'chrome-extension://' + chrome.runtime.id + '/options.html', selected: true })
+        chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/options.html`, selected: true })
     } else {
         // get settings
         chrome.storage.sync.get({
@@ -48,9 +48,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     setTimeout(() => {
                         if (item.createTab) {
-                            chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: false })
+                            chrome.tabs.create({ url: `https://github.com/${request.repo}/issues/${request.issueNumber}`, selected: false })
                         }
-                        chrome.tabs.update(tabs[0].id, { url: 'https://github.com/' + request.organization + '/' + request.oldRepo + filter.filter, selected: true })
+                        chrome.tabs.update(tabs[0].id, { url: `https://github.com/${request.organization}/${request.oldRepo}${filter.filter}`, selected: true })
                     }, 1000)
                 })
             }
@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 console.log('no navigation')
                 if (item.createTab) {
                     // if user setting is not set, open open cloned issue in new tab and set focus to that tab
-                    setTimeout(() => { chrome.tabs.create({ url: 'https://github.com/' + request.repo + '/issues/' + request.issueNumber, selected: true }) }, 1000)
+                    setTimeout(() => { chrome.tabs.create({ url: `https://github.com/${request.repo}/issues/${request.issueNumber}`, selected: true }) }, 1000)
                 }
             }
         })
