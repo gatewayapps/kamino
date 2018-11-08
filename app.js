@@ -1,7 +1,7 @@
 var token = ''
 
 // the backdrop
-var backdrop = $('<div class="kamino-backdrop fade in"></div>');
+var backdrop = $('<div class="kamino-backdrop fade in"></div>')
 
 // repo list
 var repoList = []
@@ -46,7 +46,7 @@ function initializeExtension() {
     $(popup).insertBefore($('.sidebar-assignee'))
 
     // remove the open class just to be sure
-    $('.btn-group').removeClass('open');
+    $('.btn-group').removeClass('open')
 
     // load the token
     chrome.storage.sync.get({
@@ -112,8 +112,8 @@ function saveAppliedFilters(urlObj) {
       filters: []
     }, (item) => {
 
-      var exists = false;
-      var changed = false;
+      var exists = false
+      var changed = false
 
       // convert the string to an empty array for existing users
       if (typeof item.filters === 'string') {
@@ -179,7 +179,7 @@ function getRepos(url) {
 
 function loadRepos() {
   // wire up search value change events
-  var lastValue = '';
+  var lastValue = ''
   $(".repoSearch").on('change keyup paste mouseup', function () {
     if ($(this).val() != lastValue) {
       lastValue = $(this).val()
@@ -220,7 +220,7 @@ function compileRepositoryList(list, searchTerm) {
   }, (item) => {
     // check for a populated list
     if (item.mostUsed && item.mostUsed.length > 0) {
-      $('.quickClone').attr('data-repo', item.mostUsed[0]);
+      $('.quickClone').attr('data-repo', item.mostUsed[0])
       $('.quickClone').text(`Clone to ${item.mostUsed[0].substring(item.mostUsed[0].indexOf('/') + 1)}`)
 
       // show used separator header
@@ -255,7 +255,7 @@ function compileRepositoryList(list, searchTerm) {
     }
     else {
       $('.dropdown-header-used').removeClass('active')
-      $('.quickClone').text('Clone to');
+      $('.quickClone').text('Clone to')
     }
 
     // show or hide rest header based on number of items
@@ -266,7 +266,7 @@ function compileRepositoryList(list, searchTerm) {
     }
 
     list.forEach((repo) => {
-      addRepoToList(repo.full_name, repo.name);
+      addRepoToList(repo.full_name, repo.name)
     })
   })
 }
@@ -409,7 +409,7 @@ function addToMostUsed(repo) {
     // find the item
     if (item.mostUsed.find((e) => { return e === repo }) !== undefined) {
       // if exists, get index
-      var index = item.mostUsed.indexOf(repo);
+      var index = item.mostUsed.indexOf(repo)
 
       // remove
       item.mostUsed.splice(index, 1)
@@ -462,7 +462,7 @@ function itemClick(repo) {
 
 function closeModal() {
   // make sure the modal closes properly
-  $('.kamino-backdrop').remove();
+  $('.kamino-backdrop').remove()
   $('#kaminoModal').removeClass('in')
   $('#kaminoModal').css('display', '')
 }
@@ -470,5 +470,5 @@ function closeModal() {
 function openModal() {
   $('#kaminoModal').addClass('in')
   $('#kaminoModal').css('display', 'block')
-  $('#js-repo-pjax-container').append(backdrop);
+  $('#js-repo-pjax-container').append(backdrop)
 }
