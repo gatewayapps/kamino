@@ -303,9 +303,42 @@ function getGithubIssue(repo, closeOriginal) {
 
 // create the cloned GitHub issue
 function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
+  const urlObj = populateUrlMetadata()
+
   ajaxRequest('POST', newIssue, `https://api.github.com/repos/${repo}/issues`).then((response) => {
-    // add a comment to the closed issue
-    commentOnIssue(repo, oldIssue, response.data, closeOriginal)
+    // clone comments from old issue to new issue
+    cloneOldIssueComments(response.data.number, repo, `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments?per_page=100`).then((res) => {
+      // add a comment to the closed issue
+      commentOnIssue(repo, oldIssue, response.data, closeOriginal)
+    })
+  })
+}
+
+function cloneOldIssueComments(newIssue, repo, url) {
+  return ajaxRequest('GET', '', url).then((comments) => {
+    chrome.storage.sync.get({
+      cloneComments: false
+    }, (item) => {
+      if (!item.cloneComments) {
+        return Promise.resolve(null)
+      }
+
+      if (!comments || !comments.data || comments.data.length === 0) {
+        return Promise.resolve(null)
+      }    
+  
+      const promises = []
+      comments.data.forEach((comment) => {
+        const c = {
+          body: comment.body
+        }
+        promises.push(ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`))
+      })
+  
+      Promise.all(promises).then((res) => {
+        return Promise.resolve({})
+      })
+    })
   })
 }
 

@@ -3,11 +3,13 @@ function save_options() {
   var token = document.getElementById('github-pat').value;
   var goToList = document.getElementById('go-to-issue-list').checked;
   var createTab = document.getElementById('create-tab').checked;
+  var cloneComments = document.getElementById('clone-comments').checked;
 
   chrome.storage.sync.set({
     githubToken: token,
     goToList: goToList,
-    createTab: createTab
+    createTab: createTab,
+    cloneComments: cloneComments
   }, function() {
     // Update status to let user know options were saved.
     var status = document.getElementById('status');
@@ -27,11 +29,13 @@ function restore_options() {
   chrome.storage.sync.get({
     githubToken: '',
     goToList: false,
-    createTab: true
+    createTab: true,
+    cloneComments: false
   }, function(items) {
     document.getElementById('github-pat').value = items.githubToken;
     document.getElementById('go-to-issue-list').checked = items.goToList;
     document.getElementById('create-tab').checked = items.createTab;
+    document.getElementById('clone-comments').checked = items.cloneComments;
   });
 }
 
