@@ -11,13 +11,16 @@ Once you have your PAT, enter it on the Options screen for Kamino and click `Sav
 
 # Features
 
+## Settings
+- `Go to original repo's issue list after cloning` will navigate to the issue list for the repo from which the cloning was done
+- `Create tab for cloned issue` will open a new tab and navigate to the newly cloned issue
+- `Copy comments when cloning issue` will copy all comments when the issue is cloned
+
 ## Normal operations
 Clicking this button will display a dropdown list of repos. Selecting a repo will ask you to perform one of the following actions:
 - `Clone and Close` will clone the issue and automatically close the original issue
 - `Just Clone` will clone the issue and keep the original issue open. This is useful if you've got shared code bases across repos and the issue is similar or the same across repos.
 - `Nevermind` will close the modal and no action will be performed
-
-There are user settings for opening the new issue in a tab as well as navigating back to the original issue's repository issues list and these things will happen after Kamino has cloned the issue. Check the `Options` screen where your Personal Access Token was entered and saved.
 
 ## Last used
 Kamino will remember the last 5 repositories you cloned to so that it will be easy for you to find. If you are someone that is a member of a lot of repos, this should be very handy!
