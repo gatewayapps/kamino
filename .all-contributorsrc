@@ -18,6 +18,15 @@
         "maintenance",
         "projectManagement"
       ]
+    },
+    {
+      "login": "danielgary",
+      "name": "Daniel Gary",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/5438098?v=4",
+      "profile": "https://github.com/danielgary",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,

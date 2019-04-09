@@ -1,5 +1,5 @@
 # Kamino - The Github issue cloning tool
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 
 Kamino is a Chrome and Edge Extension that creates a button on Github issue pages. This button can be used to clone an issue to any other repository in which you, the user, are a contributor or member.
 
@@ -48,7 +48,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-<table><tr><td align="center"><a href="https://github.com/johnmurphy01"><img src="https://avatars2.githubusercontent.com/u/2939548?v=4" width="100px;" alt="John Murphy"/><br /><sub><b>John Murphy</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=johnmurphy01" title="Code">💻📖🎨🤔🚧📆</a></td></tr></table>
+<table><tr><td align="center"><a href="https://github.com/johnmurphy01"><img src="https://avatars2.githubusercontent.com/u/2939548?v=4" width="100px;" alt="John Murphy"/><br /><sub><b>John Murphy</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=johnmurphy01" title="Code">💻</a> <a href="#design-johnmurphy01" title="Design">🎨</a> <a href="https://github.com/gatewayapps/kamino/commits?author=johnmurphy01" title="Documentation">📖</a> <a href="#ideas-johnmurphy01" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-johnmurphy01" title="Maintenance">🚧</a> <a href="#projectManagement-johnmurphy01" title="Project Management">📆</a></td><td align="center"><a href="https://github.com/danielgary"><img src="https://avatars2.githubusercontent.com/u/5438098?v=4" width="100px;" alt="Daniel Gary"/><br /><sub><b>Daniel Gary</b></sub></a><br /><a href="#ideas-danielgary" title="Ideas, Planning, & Feedback">🤔</a></td></tr></table>
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
