@@ -1,6 +1,7 @@
 # Kamino - The Github issue cloning tool
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
-Kamino is a Chrome(and hopefully soon to be Edge) Extension that creates a button on Github issue pages. This button can be used to clone an issue to any other repository in which you, the user, are a contributor or member.
+
+Kamino is a Chrome and Edge Extension that creates a button on Github issue pages. This button can be used to clone an issue to any other repository in which you, the user, are a contributor or member.
 
 ## How do I use it?
 In your Google Chrome browser, simply look for Kamino in the Chrome Extensions store and install. Once the extension is installed, go to `chrome://extensions` and click the `Options` link to enter your Github Personal Access Token(PAT). When creating your PAT, make sure to check the following:
@@ -47,7 +48,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-<table><tr><td align="center"><a href="https://github.com/johnmurphy01"><img src="https://avatars2.githubusercontent.com/u/2939548?v=4" width="100px;" alt="John Murphy"/><br /><sub><b>John Murphy</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=johnmurphy01" title="Code">💻</a></td></tr></table>
+<table><tr><td align="center"><a href="https://github.com/johnmurphy01"><img src="https://avatars2.githubusercontent.com/u/2939548?v=4" width="100px;" alt="John Murphy"/><br /><sub><b>John Murphy</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=johnmurphy01" title="Code">💻📖🎨🤔🚧📆</a></td></tr></table>
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
