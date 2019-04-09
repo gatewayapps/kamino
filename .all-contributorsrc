@@ -27,6 +27,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "mzia",
+      "name": "Mossadeq Zia",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/3779697?v=4",
+      "profile": "https://www.linkedin.com/in/mossadeqzia",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
