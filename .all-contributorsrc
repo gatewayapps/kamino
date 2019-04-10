@@ -101,6 +101,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "pavog",
+      "name": "Paul Vogel",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/4786628?v=4",
+      "profile": "http://www.paulvogel.me",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
