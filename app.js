@@ -25,6 +25,11 @@ function initializeExtension() {
     return
   }
 
+  // don't continue if the template cannot be loaded
+  if (!Handlebars.templates) {
+    return
+  }
+
   // the button
   const newBtn = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm, ''))
 
