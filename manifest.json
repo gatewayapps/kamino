@@ -1,51 +1,36 @@
 {
-    "author": "John Murphy - Gateway Apps, LLC",
-    "content_scripts": [
-        {
-            "matches": [
-                "*://github.com/*/*/issues/*"
-            ],
-            "js": [
-                "jquery/jquery-3.2.0.min.js",
-                "handlebars.runtime-v4.0.10.js",
-                "app.js",
-                "template.js"
-            ],
-            "css": [
-                "css/style.css"
-            ],
-            "run_at": "document_end"
-        }
-    ],
-    "background": {
-        "scripts":["background.js"]
-    },
-    "description": "This extension shows a button on Github issue pages that can be used to clone github issues across repositories",
-    "icons": {
-        "128": "icons/storm-trooper-128.png"
-    },
-    "content_security_policy": "script-src 'self' https://code.jquery.com/jquery-3.2.1.min.js https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js 'unsafe-eval'; object-src 'self'; style-src 'self' https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css 'unsafe-inline';",
-    "manifest_version": 2,
-    "name": "Kamino",
-    "options_page": "options.html",
-    "permissions": [
-        "tabs",
-        "background",
-        "storage",
-        "webNavigation",
-        "*://github.com/*"
-    ],
-    "version": "2.10.0",
-    "web_accessible_resources":[
-        "icons/*.png",
-        "bootstrap/js/bootstrap.min.js",
-        "css/*.css",
-        "jquery/jquery-3.2.0.min.js",
-        "handlebars.runtime-v4.0.10.js",
-        "template.js",
-        "app.js",
-        "options.html",
-        "options.js",
-        "background.js"
-    ]
+  "author": "John Murphy - Gateway Apps, LLC",
+  "content_scripts": [
+    {
+      "matches": ["*://github.com/*/*/issues/*"],
+      "js": ["jquery/jquery-3.2.0.min.js", "handlebars.runtime-v4.0.10.js", "app.js", "template.js"],
+      "css": ["css/style.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "description": "This extension shows a button on Github issue pages that can be used to clone github issues across repositories",
+  "icons": {
+    "128": "icons/storm-trooper-128.png"
+  },
+  "content_security_policy": "script-src 'self' https://code.jquery.com/jquery-3.2.1.min.js https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js 'unsafe-eval'; object-src 'self'; style-src 'self' https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css 'unsafe-inline';",
+  "manifest_version": 2,
+  "name": "Kamino",
+  "options_page": "options.html",
+  "permissions": ["tabs", "background", "storage", "webNavigation", "*://github.com/*"],
+  "version": "2.10.0",
+  "web_accessible_resources": [
+    "icons/*.png",
+    "bootstrap/js/bootstrap.min.js",
+    "css/*.css",
+    "jquery/jquery-3.2.0.min.js",
+    "handlebars.runtime-v4.0.10.js",
+    "template.js",
+    "app.js",
+    "options.html",
+    "options.js",
+    "background.js"
+  ]
 }
