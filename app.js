@@ -303,7 +303,6 @@ function getGithubIssue(repo, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
   // enable issues for this repo
-  console.log(`${baseUrl}/repos/${repo}`)
   const repoName = repo.split('/')[1]
   ajaxRequest('PATCH', { has_issues: true, name: repoName }, `${baseUrl}/repos/${repo}`).then(() => {
     ajaxRequest('GET', '', `${baseUrl}/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`).then((issue) => {
