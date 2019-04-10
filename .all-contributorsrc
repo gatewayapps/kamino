@@ -73,7 +73,15 @@
       "profile": "https://github.com/adamperlin",
       "contributions": [
         "code"
-
+      ]
+    },
+    {
+      "login": "rbetts",
+      "name": "Ryan Betts",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/158141?v=4",
+      "profile": "https://hazelnotes.org",
+      "contributions": [
+        "ideas"
       ]
     }
   ],
