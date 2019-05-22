@@ -131,6 +131,15 @@
       "contributions": [
         "review"
       ]
+    },
+    {
+      "login": "fuzzyweapon",
+      "name": "Julia",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1253399?v=4",
+      "profile": "https://www.linkedin.com/in/juliawillson/",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
