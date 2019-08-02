@@ -68,6 +68,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.linkedin.com/in/juliawillson/"><img src="https://avatars2.githubusercontent.com/u/1253399?v=4" width="100px;" alt="Julia"/><br /><sub><b>Julia</b></sub></a><br /><a href="#ideas-fuzzyweapon" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
   <tr>
+    <td align="center"><a href="https://github.com/SteffanoP"><img src="https://avatars1.githubusercontent.com/u/26782009?v=4" width="100px;" alt="Steffano Pereira"/><br /><sub><b>Steffano Pereira</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3ASteffanoP" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.linkedin.com/in/emfinger"><img src="https://avatars0.githubusercontent.com/u/213467?v=4" width="100px;" alt="William Emfinger"/><br /><sub><b>William Emfinger</b></sub></a><br /><a href="#ideas-finger563" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
