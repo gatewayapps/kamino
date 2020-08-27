@@ -73,6 +73,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/SteffanoP"><img src="https://avatars1.githubusercontent.com/u/26782009?v=4" width="100px;" alt=""/><br /><sub><b>Steffano Pereira</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3ASteffanoP" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://www.linkedin.com/in/emfinger"><img src="https://avatars0.githubusercontent.com/u/213467?v=4" width="100px;" alt=""/><br /><sub><b>William Emfinger</b></sub></a><br /><a href="#ideas-finger563" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/jmah-cc"><img src="https://avatars2.githubusercontent.com/u/57732952?v=4" width="100px;" alt=""/><br /><sub><b>Jay Mahendru</b></sub></a><br /><a href="#ideas-jmah-cc" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/sjsaha"><img src="https://avatars0.githubusercontent.com/u/7125423?v=4" width="100px;" alt=""/><br /><sub><b>sjsaha</b></sub></a><br /><a href="#ideas-sjsaha" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
