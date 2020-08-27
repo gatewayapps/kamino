@@ -20,7 +20,7 @@
   "name": "Kamino",
   "options_page": "options.html",
   "permissions": ["tabs", "background", "storage", "webNavigation", "*://github.com/*"],
-  "version": "2.10.1",
+  "version": "2.10.2",
   "web_accessible_resources": [
     "icons/*.png",
     "bootstrap/js/bootstrap.min.js",
