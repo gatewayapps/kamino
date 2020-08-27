@@ -150,6 +150,7 @@
         "ideas"
       ]
     },
+    {
      "login": "SteffanoP",
       "name": "Steffano Pereira",
       "avatar_url": "https://avatars1.githubusercontent.com/u/26782009?v=4",
@@ -166,7 +167,7 @@
       "contributions": [
         "ideas"
       ]
-    },    
+    }
   ],
   "contributorsPerLine": 7,
   "projectName": "kamino",
