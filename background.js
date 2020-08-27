@@ -1,23 +1,43 @@
-// used when Github uses push state.
-chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-  chrome.tabs.executeScript(null, { file: 'jquery/jquery-3.2.0.min.js', runAt: 'document_end' }, (j) => {
-    chrome.tabs.executeScript(null, { file: 'handlebars.runtime-v4.0.10.js', runAt: 'document_end' }, (h) => {
-      chrome.tabs.executeScript(null, { file: 'template.js', runAt: 'document_end' }, (h) => {
-        chrome.tabs.executeScript(null, { file: 'app.js', runAt: 'document_end' }, (a) => {
-          chrome.tabs.insertCSS(null, { file: 'css/style.css', runAt: 'document_end' })
-        })
-      })
-    })
-  })
-})
-
 // open the Kamino Github page on installed
 chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === 'installed') {
+  if (details.reason === 'install') {
     chrome.tabs.create({ url: 'https://github.com/gatewayapps/kamino' }, (tab) => {
       console.log('Kamino Github page launched')
     })
   }
+})
+
+chrome.runtime.onUpdated.addListener((tabId, changeInfo, tab) => {
+  chrome.storage.sync.get(
+    {
+      githubEnterpriseUrl: null,
+    },
+    (item) => {
+      console.log(item.githubEnterpriseUrl)
+      if (item.githubEnterpriseUrl) {
+        if (changeInfo.url.indexOf('github.com') < 0) {
+          if (changeInfo.status === 'complete' && changeInfo.url.indexOf(item.githubEnterpriseUrl) < 0) {
+            // used when Github uses push state.
+            chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+              chrome.tabs.executeScript(null, { file: 'jquery/jquery-3.2.0.min.js', runAt: 'document_end' }, (j) => {
+                chrome.tabs.executeScript(
+                  null,
+                  { file: 'handlebars.runtime-v4.0.10.js', runAt: 'document_end' },
+                  (h) => {
+                    chrome.tabs.executeScript(null, { file: 'template.js', runAt: 'document_end' }, (h) => {
+                      chrome.tabs.executeScript(null, { file: 'app.js', runAt: 'document_end' }, (a) => {
+                        chrome.tabs.insertCSS(null, { file: 'css/style.css', runAt: 'document_end' })
+                      })
+                    })
+                  }
+                )
+              })
+            })
+          }
+        }
+      }
+    }
+  )
 })
 
 // listen for tab change requests

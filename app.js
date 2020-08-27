@@ -3,6 +3,8 @@ var token = ''
 // repo list
 var repoList = []
 
+let githubApiUrl = 'https://api.github.com'
+
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
@@ -25,7 +27,7 @@ function initializeExtension() {
   // the modal
   const context = {
     confirmText:
-      'Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.'
+      'Are you sure you want to clone this issue to another repository? Choose whether to clone and close or clone and keep the original issue open.',
   }
   const popup = $(Handlebars.templates.modal(context).replace(/(\r\n|\n|\r)/gm, ''))
 
@@ -54,10 +56,15 @@ function initializeExtension() {
     // load the token
     chrome.storage.sync.get(
       {
-        githubToken: ''
+        githubEnterpriseUrl: null,
+        githubToken: '',
       },
       (item) => {
         token = item.githubToken
+        if (item.githubEnterpriseUrl) {
+          githubApiUrl = `${item.githubEnterpriseUrl}api/v3`
+        }
+
         // grab the PAT
         if ($('.kaminoButton').length > 0) {
           loadRepos()
@@ -110,12 +117,12 @@ function saveAppliedFilters(urlObj) {
     var filter = {
       filter: querystring,
       organization: urlObj.organization,
-      currentRepo: urlObj.currentRepo
+      currentRepo: urlObj.currentRepo,
     }
 
     chrome.storage.sync.get(
       {
-        filters: []
+        filters: [],
       },
       (item) => {
         var exists = false
@@ -149,7 +156,7 @@ function saveAppliedFilters(urlObj) {
         if (changed) {
           chrome.storage.sync.set(
             {
-              filters: item.filters
+              filters: item.filters,
             },
             () => {
               console.log('filters saved')
@@ -192,7 +199,7 @@ function getRepos(url) {
 function loadRepos() {
   // wire up search value change events
   var lastValue = ''
-  $('.repoSearch').on('change keyup paste mouseup', function() {
+  $('.repoSearch').on('change keyup paste mouseup', function () {
     if ($(this).val() != lastValue) {
       lastValue = $(this).val()
       searchRepositories(lastValue)
@@ -221,13 +228,13 @@ function loadRepos() {
   $('.repoDropdown').append('<li class="dropdown-header dropdown-header-used">Last Used</li>')
   $('.repoDropdown').append('<li class="dropdown-header dropdown-header-rest">The Rest</li>')
 
-  getRepos('https://api.github.com/user/repos?per_page=100').then(() => {})
+  getRepos(`${githubApiUrl}/user/repos?per_page=100`).then(() => {})
 }
 
 function compileRepositoryList(list, searchTerm) {
   chrome.storage.sync.get(
     {
-      mostUsed: []
+      mostUsed: [],
     },
     (item) => {
       // check for a populated list
@@ -304,15 +311,13 @@ function getGithubIssue(repo, closeOriginal) {
   ajaxRequest(
     'GET',
     '',
-    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`
+    `${githubApiUrl}/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`
   ).then((issue) => {
     // build new issue
     const newIssue = {
       title: issue.data.title,
-      body: `From ${urlObj.currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${
-        urlObj.organization
-      }/${urlObj.currentRepo}#${urlObj.issueNumber}  \n\n${issue.data.body}`,
-      labels: issue.data.labels
+      body: `From ${urlObj.currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}  \n\n${issue.data.body}`,
+      labels: issue.data.labels,
     }
 
     createGithubIssue(newIssue, repo, issue.data, closeOriginal)
@@ -323,14 +328,12 @@ function getGithubIssue(repo, closeOriginal) {
 function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
-  ajaxRequest('POST', newIssue, `https://api.github.com/repos/${repo}/issues`).then((response) => {
+  ajaxRequest('POST', newIssue, `${githubApiUrl}/repos/${repo}/issues`).then((response) => {
     // clone comments from old issue to new issue
     cloneOldIssueComments(
       response.data.number,
       repo,
-      `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${
-        urlObj.issueNumber
-      }/comments?per_page=100`
+      `${githubApiUrl}/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments?per_page=100`
     ).then((res) => {
       // add a comment to the closed issue
       commentOnIssue(repo, oldIssue, response.data, closeOriginal)
@@ -342,7 +345,7 @@ function cloneOldIssueComments(newIssue, repo, url) {
   return ajaxRequest('GET', '', url).then((comments) => {
     chrome.storage.sync.get(
       {
-        cloneComments: false
+        cloneComments: false,
       },
       (item) => {
         if (!item.cloneComments) {
@@ -356,9 +359,9 @@ function cloneOldIssueComments(newIssue, repo, url) {
         const promises = []
         comments.data.forEach((comment) => {
           const c = {
-            body: comment.body
+            body: comment.body,
           }
-          promises.push(ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`))
+          promises.push(ajaxRequest('POST', c, `${githubApiUrl}/repos/${repo}/issues/${newIssue}/comments`))
         })
 
         Promise.all(promises).then((res) => {
@@ -371,7 +374,7 @@ function cloneOldIssueComments(newIssue, repo, url) {
 
 function closeGithubIssue(oldIssue) {
   const issueToClose = {
-    state: 'closed'
+    state: 'closed',
   }
 
   const urlObj = populateUrlMetadata()
@@ -379,7 +382,7 @@ function closeGithubIssue(oldIssue) {
   ajaxRequest(
     'PATCH',
     issueToClose,
-    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`
+    `${githubApiUrl}/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`
   ).then((done) => {})
 }
 
@@ -389,13 +392,13 @@ function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
   const comment = {
     body: closeOriginal
       ? `Kamino closed and cloned this issue to ${newIssueLink}`
-      : `Kamino cloned this issue to ${newIssueLink}`
+      : `Kamino cloned this issue to ${newIssueLink}`,
   }
 
   ajaxRequest(
     'POST',
     comment,
-    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments`
+    `${githubApiUrl}/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments`
   ).then((response) => {
     if (closeOriginal) {
       // if success, close the existing issue and open new in a new tab
@@ -417,7 +420,7 @@ function ajaxRequest(type, data, url) {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get(
       {
-        githubToken: ''
+        githubToken: '',
       },
       (item) => {
         token = item.githubToken
@@ -428,12 +431,12 @@ function ajaxRequest(type, data, url) {
             request.setRequestHeader('Content-Type', 'application/json')
           },
           data: JSON.stringify(data),
-          url: url
+          url: url,
         }).done((data, status, header) => {
           resolve({
             data: data,
             status: status,
-            header: header
+            header: header,
           })
         })
       }
@@ -474,7 +477,7 @@ function populateUrlMetadata() {
     url: url,
     currentRepo: currentRepo,
     organization: organization,
-    issueNumber: issueNumber
+    issueNumber: issueNumber,
   }
 
   return urlObject
@@ -484,7 +487,7 @@ function addToMostUsed(repo) {
   // get
   chrome.storage.sync.get(
     {
-      mostUsed: []
+      mostUsed: [],
     },
     (item) => {
       // find the item
@@ -519,7 +522,7 @@ function addToMostUsed(repo) {
       // save
       chrome.storage.sync.set(
         {
-          mostUsed: item.mostUsed
+          mostUsed: item.mostUsed,
         },
         (done) => {}
       )
