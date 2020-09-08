@@ -77,6 +77,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/knutwannheden"><img src="https://avatars3.githubusercontent.com/u/408765?v=4" width="100px;" alt=""/><br /><sub><b>Knut Wannheden</b></sub></a><br /><a href="#ideas-knutwannheden" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://github.com/jlczuk"><img src="https://avatars2.githubusercontent.com/u/8922067?v=4" width="100px;" alt=""/><br /><sub><b>John L. Czukkermann</b></sub></a><br /><a href="#ideas-jlczuk" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="http://www.marcoagerosa.com"><img src="https://avatars0.githubusercontent.com/u/1161086?v=4" width="100px;" alt=""/><br /><sub><b>Marco Aurelio Gerosa</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=marcogerosa" title="Documentation">📖</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-enable -->
