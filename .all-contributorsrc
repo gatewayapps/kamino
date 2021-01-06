@@ -212,6 +212,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "fharper",
+      "name": "Frédéric Harper",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1170989?v=4",
+      "profile": "https://fred.dev",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
