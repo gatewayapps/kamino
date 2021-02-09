@@ -254,10 +254,7 @@ function compileRepositoryList(list, searchTerm) {
         }
 
         mostUsed.forEach((repoFull) => {
-          // remove organization
-          var repo = repoFull.substring(repoFull.indexOf('/') + 1)
-
-          addRepoToList(repoFull, repo, 'used')
+          addRepoToList(repoFull, 'used')
 
           // remove the item from the main repos list
           list = list.filter((i) => {
@@ -277,7 +274,7 @@ function compileRepositoryList(list, searchTerm) {
       }
 
       list.forEach((repo) => {
-        addRepoToList(repo.full_name, repo.name)
+        addRepoToList(repo.full_name)
       })
     }
   )
@@ -452,9 +449,9 @@ function ajaxRequest(type, data, url) {
   })
 }
 
-function addRepoToList(repoFullName, repo, section) {
+function addRepoToList(repoFullName, section) {
   // add the repo to the list
-  const periodReplace = repo.replace(/\./g, '_')
+  const periodReplace = repoFullName.replace(/\./g, '_').replace(/\//g, '_')
 
   // determine where the item needs to go
   if (section === 'used') {
