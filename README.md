@@ -93,6 +93,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="http://www.marcoagerosa.com"><img src="https://avatars0.githubusercontent.com/u/1161086?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marco Aurelio Gerosa</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=marcogerosa" title="Documentation">📖</a></td>
     <td align="center"><a href="https://fred.dev"><img src="https://avatars3.githubusercontent.com/u/1170989?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Frédéric Harper</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3Afharper" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://maciejwalkowiak.com"><img src="https://avatars.githubusercontent.com/u/1357927?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Maciej Walkowiak</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=maciejwalkowiak" title="Code">💻</a></td>
   </tr>
 </table>
 
