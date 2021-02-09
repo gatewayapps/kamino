@@ -221,6 +221,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "maciejwalkowiak",
+      "name": "Maciej Walkowiak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1357927?v=4",
+      "profile": "https://maciejwalkowiak.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
