@@ -1,6 +1,6 @@
 .sidebar-kamino {
   padding-bottom: 30px;
-  border-bottom: 1px solid #e6ebf1;
+  border-bottom: 1px solid var(--color-border-overlay);
 }
 
 .dropdown-menu > .repoDropdown > li > a {
@@ -12,15 +12,15 @@
   overflow-x: hidden;
   text-overflow: ellipsis;
   line-height: 1.42857143;
-  color: #333;
+  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
 .dropdown-menu > .repoDropdown > li > a:focus,
 .dropdown-menu > .repoDropdown > li > a:hover {
-  color: #262626;
+  color: var(--color-state-hover-primary-text);
   text-decoration: none;
-  background-color: #f5f5f5;
+  background-color: var(--color-state-hover-primary-bg);
 }
 
 a {
@@ -47,6 +47,10 @@ a {
   margin-right: 5px;
   font-size: 0.875rem;
   height: 30px;
+  background-color: var(--color-input-bg);
+  border: 1px solid var(--color-select-menu-border-secondary);
+  border-radius: 6px;
+  padding: 5px;
 }
 
 .repoDropdownContainer {
@@ -162,7 +166,7 @@ a {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
+  background-color: var(--color-bg-canvas);
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
   border: 1px solid #999;
@@ -171,6 +175,8 @@ a {
   outline: 0;
   -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
   box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
+  color: var(--color-text-primary);
+  color: var(--color-text-primary);
 }
 
 .modal-header {
@@ -195,8 +201,8 @@ button.close {
   font-size: 21px;
   font-weight: 700;
   line-height: 1;
-  color: #000;
-  text-shadow: 0 1px 0 #fff;
+  color: var(--color-text-primary);
+  text-shadow: 0 1px 0 var(--color-btn-shadow);
   filter: alpha(opacity=20);
   opacity: 0.2;
 }
