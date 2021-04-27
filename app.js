@@ -457,12 +457,12 @@ function addRepoToList(repoFullName, section) {
   if (section === 'used') {
     if ($(`#${periodReplace}`).length === 0) {
       $('.dropdown-header-rest').before(
-        `<li data-toggle="modal" id="${periodReplace}" data-target="#kaminoModal"><a class="repoItem" href="#">${repoFullName}</a></li>`
+        `<li data-toggle="modal" id="${periodReplace}" data-target="#kaminoModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></li>`
       )
     }
   } else {
     $('.repoDropdown').append(
-      `<li data-toggle="modal" id="${periodReplace}" data-target="#kaminoModal"><a class="repoItem" href="#">${repoFullName}</a></li>`
+      `<li data-toggle="modal" id="${periodReplace}" data-target="#kaminoModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></li>`
     )
   }
 
