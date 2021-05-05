@@ -6,7 +6,7 @@ var repoList = []
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
-  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.0/jquery.min.js', () => {
+  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js', () => {
     setInterval(() => {
       initializeExtension()
     }, 1000)

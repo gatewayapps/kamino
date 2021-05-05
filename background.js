@@ -1,7 +1,7 @@
 // used when Github uses push state.
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-    chrome.tabs.executeScript(null, { file: "jquery/jquery-3.2.0.min.js", runAt: 'document_end' }, (j) => {
-        chrome.tabs.executeScript(null, { file: "handlebars.runtime-v4.0.10.js", runAt: 'document_end' }, (h) => {
+    chrome.tabs.executeScript(null, { file: "jquery/jquery-3.6.0.min.js", runAt: 'document_end' }, (j) => {
+        chrome.tabs.executeScript(null, { file: "handlebars.runtime.min-v4.7.7.js", runAt: 'document_end' }, (h) => {
             chrome.tabs.executeScript(null, { file: "template.js", runAt: 'document_end' }, (h) => {
                 chrome.tabs.executeScript(null, { file: "app.js", runAt: 'document_end' }, (a) => {
                     chrome.tabs.insertCSS(null, { file: "css/style.css", runAt: 'document_end' })
