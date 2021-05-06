@@ -2,6 +2,12 @@
   "author": "John Murphy - Gateway Apps, LLC",
   "content_scripts": [
     {
+      "matches": ["*://github.com/*/*/issues"],
+      "js": ["jquery/jquery-3.6.0.min.js", "handlebars.runtime.min-v4.7.7.js", "batch.js", "template.js"],
+      "css": ["css/style.css"],
+      "run_at": "document_end"
+    }, 
+    {
       "matches": ["*://github.com/*/*/issues/*"],
       "js": ["jquery/jquery-3.6.0.min.js", "handlebars.runtime.min-v4.7.7.js", "app.js", "template.js"],
       "css": ["css/style.css"],

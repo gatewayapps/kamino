@@ -1,0 +1,30 @@
+<div id="batchModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Kamino - Batch Clone(Experimental!)</h4>
+            </div>
+            <div class="modal-body">
+                <p>Select a destination repository:</p>
+                <div class="batchRepoDropdownContainer">
+                    <input class="repoSearch" type="text" placeholder="Search for a repo..." />
+                    <hr />
+                    <select class="repoDropdown"></select>
+                </div>
+
+                <p style="margin-top: 33px;">Select issues:</p>
+                <div class="batchIssuesContainer"></div>
+
+                <div class='message'></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary cloneAndClose" style="margin-right:20px;"
+                    data-dismiss="modal" data-repo="">Clone and Close</button>
+                <button type="button" class="btn btn-primary cloneAndKeepOpen" style="margin-right:20px;"
+                    data-dismiss="modal" data-repo="">Just Clone</button>
+                <button type="button" class="btn btn-info noClone" data-dismiss="modal">Nevermind</button>
+            </div>
+        </div>
+    </div>
+</div>

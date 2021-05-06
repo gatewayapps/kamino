@@ -48,7 +48,7 @@ class EdgeBridgeDebugLog {
         this.CatchOnException = true;
         this.VerboseLogging = true;
         this.FailedCalls = {};
-        this.SuccededCalls = {};
+        this.SucceededCalls = {};
         this.DeprecatedCalls = {};
         this.BridgedCalls = {};
         this.UnavailableApis = {};
@@ -94,7 +94,7 @@ class EdgeBridgeDebugLog {
         var result;
         try {
             result = action();
-            this.AddToCalledDictionary(this.SuccededCalls, name);
+            this.AddToCalledDictionary(this.SucceededCalls, name);
             if (typeof deprecatedTo !== "undefined" && typeof deprecatedTo !== "null") {
                 this.warn(`API Call Deprecated - Name: ${name}, Please use ${deprecatedTo} instead!"`);
                 this.AddToCalledDictionary(this.DeprecatedCalls, name);
@@ -117,7 +117,7 @@ class EdgeBridgeDebugLog {
         this.warn(message);
         this.AddToCalledDictionary(this.EdgeIssues, name);
     }
-    LogUnavailbleApi(name, deprecatedTo) {
+    LogUnavailableApi(name, deprecatedTo) {
         this.warn(`API Call '${name}' is not supported in Edge"`);
         this.AddToCalledDictionary(this.UnavailableApis, name);
         if (typeof deprecatedTo !== "undefined" && typeof deprecatedTo !== "null") {
@@ -213,13 +213,13 @@ class EdgeBrowserActionBridge {
 }
 class EdgeChromeBrowserActionBridge extends EdgeBrowserActionBridge {
     getPopup(details, callback) {
-        bridgeLog.LogUnavailbleApi("browserAction.getPopup");
+        bridgeLog.LogUnavailableApi("browserAction.getPopup");
     }
     getTitle(details, callback) {
-        bridgeLog.LogUnavailbleApi("browserAction.getTitle");
+        bridgeLog.LogUnavailableApi("browserAction.getTitle");
     }
     setTitle(details) {
-        bridgeLog.LogUnavailbleApi("browserAction.setTitle");
+        bridgeLog.LogUnavailableApi("browserAction.setTitle");
     }
 }
 class EdgeContextMenusBridge {
@@ -299,7 +299,7 @@ class EdgeCookiesBridge {
     }
 }
 class EdgeChromeCookiesBridge extends EdgeCookiesBridge {
-    get onChanged() { bridgeLog.LogUnavailbleApi("cookies.onChanged"); return bridgeHelper.fakeEvent; }
+    get onChanged() { bridgeLog.LogUnavailableApi("cookies.onChanged"); return bridgeHelper.fakeEvent; }
 }
 class EdgeExtensionBridge {
     getBackgroundPage() {
@@ -341,35 +341,35 @@ class EdgeChromeExtensionBridge extends EdgeExtensionBridge {
         }, "extension.sendRequest", "runtime.sendMessage", "runtime.sendMessage");
     }
     isAllowedFileSchemeAccess(callback) {
-        bridgeLog.LogUnavailbleApi("extension.isAllowedFileSchemeAccess");
+        bridgeLog.LogUnavailableApi("extension.isAllowedFileSchemeAccess");
     }
     isAllowedIncognitoAccess(callback) {
-        bridgeLog.LogUnavailbleApi("extension.isAllowedIncognitoAccess");
+        bridgeLog.LogUnavailableApi("extension.isAllowedIncognitoAccess");
     }
     setUpdateUrlData(data) {
-        bridgeLog.LogUnavailbleApi("extension.setUpdateUrlData");
+        bridgeLog.LogUnavailableApi("extension.setUpdateUrlData");
     }
 }
 class EdgeHistoryBridge {
-    get onVisited() { bridgeLog.LogUnavailbleApi("history.onVisited"); return bridgeHelper.fakeEvent; }
-    get onVisitRemoved() { bridgeLog.LogUnavailbleApi("history.onVisitRemoved"); return bridgeHelper.fakeEvent; }
+    get onVisited() { bridgeLog.LogUnavailableApi("history.onVisited"); return bridgeHelper.fakeEvent; }
+    get onVisitRemoved() { bridgeLog.LogUnavailableApi("history.onVisitRemoved"); return bridgeHelper.fakeEvent; }
     addUrl(details, callback) {
-        bridgeLog.LogUnavailbleApi("history.addUrl");
+        bridgeLog.LogUnavailableApi("history.addUrl");
     }
     deleteAll(callback) {
-        bridgeLog.LogUnavailbleApi("history.deleteAll");
+        bridgeLog.LogUnavailableApi("history.deleteAll");
     }
     deleteRange(range, callback) {
-        bridgeLog.LogUnavailbleApi("history.deleteRange");
+        bridgeLog.LogUnavailableApi("history.deleteRange");
     }
     deleteUrl(details, callback) {
-        bridgeLog.LogUnavailbleApi("history.deleteUrl");
+        bridgeLog.LogUnavailableApi("history.deleteUrl");
     }
     getVisits(details, callback) {
-        bridgeLog.LogUnavailbleApi("history.getVisits");
+        bridgeLog.LogUnavailableApi("history.getVisits");
     }
     search(query, callback) {
-        bridgeLog.LogUnavailbleApi("history.search");
+        bridgeLog.LogUnavailableApi("history.search");
     }
 }
 class EdgeI18nBridge {
@@ -398,25 +398,25 @@ class EdgeI18nBridge {
     }
 }
 class EdgeNotificationBridge {
-    get onButtonClicked() { bridgeLog.LogUnavailbleApi("notifications.onButtonClicked"); return bridgeHelper.fakeEvent; }
-    get onClicked() { bridgeLog.LogUnavailbleApi("notifications.onClicked"); return bridgeHelper.fakeEvent; }
-    get onClosed() { bridgeLog.LogUnavailbleApi("notifications.onClosed"); return bridgeHelper.fakeEvent; }
-    get onPermissionLevelChanged() { bridgeLog.LogUnavailbleApi("notifications.onPermissionLevelChanged"); return bridgeHelper.fakeEvent; }
-    get onShowSettings() { bridgeLog.LogUnavailbleApi("notifications.onShowSettings"); return bridgeHelper.fakeEvent; }
+    get onButtonClicked() { bridgeLog.LogUnavailableApi("notifications.onButtonClicked"); return bridgeHelper.fakeEvent; }
+    get onClicked() { bridgeLog.LogUnavailableApi("notifications.onClicked"); return bridgeHelper.fakeEvent; }
+    get onClosed() { bridgeLog.LogUnavailableApi("notifications.onClosed"); return bridgeHelper.fakeEvent; }
+    get onPermissionLevelChanged() { bridgeLog.LogUnavailableApi("notifications.onPermissionLevelChanged"); return bridgeHelper.fakeEvent; }
+    get onShowSettings() { bridgeLog.LogUnavailableApi("notifications.onShowSettings"); return bridgeHelper.fakeEvent; }
     clear(notificationId, callback) {
-        bridgeLog.LogUnavailbleApi("notifications.clear");
+        bridgeLog.LogUnavailableApi("notifications.clear");
     }
     create(notificationId, options, callback) {
-        bridgeLog.LogUnavailbleApi("notifications.create");
+        bridgeLog.LogUnavailableApi("notifications.create");
     }
     getAll(callback) {
-        bridgeLog.LogUnavailbleApi("notifications.getAll");
+        bridgeLog.LogUnavailableApi("notifications.getAll");
     }
     getPermissionLevel(callback) {
-        bridgeLog.LogUnavailbleApi("notifications.getPermissionLevel");
+        bridgeLog.LogUnavailableApi("notifications.getPermissionLevel");
     }
     update(notificationId, options, callback) {
-        bridgeLog.LogUnavailbleApi("notifications.update");
+        bridgeLog.LogUnavailableApi("notifications.update");
     }
 }
 class EdgePageActionBridge {
@@ -463,19 +463,19 @@ class EdgePageActionBridge {
     }
 }
 class EdgePermissionsBridge {
-    get onAdded() { bridgeLog.LogUnavailbleApi("permissions.onAdded"); return bridgeHelper.fakeEvent; }
-    get onRemoved() { bridgeLog.LogUnavailbleApi("permissions.onRemoved"); return bridgeHelper.fakeEvent; }
+    get onAdded() { bridgeLog.LogUnavailableApi("permissions.onAdded"); return bridgeHelper.fakeEvent; }
+    get onRemoved() { bridgeLog.LogUnavailableApi("permissions.onRemoved"); return bridgeHelper.fakeEvent; }
     contains(permissions, callback) {
-        bridgeLog.LogUnavailbleApi("permissions.contains");
+        bridgeLog.LogUnavailableApi("permissions.contains");
     }
     getAll(callback) {
-        bridgeLog.LogUnavailbleApi("permissions.getAll");
+        bridgeLog.LogUnavailableApi("permissions.getAll");
     }
     remove(permissions, callback) {
-        bridgeLog.LogUnavailbleApi("permissions.remove");
+        bridgeLog.LogUnavailableApi("permissions.remove");
     }
     request(permissions, callback) {
-        bridgeLog.LogUnavailbleApi("permissions.request");
+        bridgeLog.LogUnavailableApi("permissions.request");
     }
 }
 class EdgeRuntimeBridge {
@@ -528,12 +528,12 @@ class EdgeRuntimeBridge {
     }
 }
 class EdgeChromeRuntimeBridge extends EdgeRuntimeBridge {
-    get onConnectExternal() { bridgeLog.LogUnavailbleApi("runtime.onConnectExternal"); return bridgeHelper.fakeEvent; }
-    get onRestartRequired() { bridgeLog.LogUnavailbleApi("runtime.onRestartRequired"); return bridgeHelper.fakeEvent; }
-    get onStartup() { bridgeLog.LogUnavailbleApi("runtime.onStartup"); return bridgeHelper.fakeEvent; }
-    get onSuspend() { bridgeLog.LogUnavailbleApi("runtime.onSuspend"); return bridgeHelper.fakeEvent; }
-    get onSuspendCanceled() { bridgeLog.LogUnavailbleApi("runtime.onSuspendCanceled"); return bridgeHelper.fakeEvent; }
-    get onUpdateAvailable() { bridgeLog.LogUnavailbleApi("runtime.onUpdateAvailable"); return bridgeHelper.fakeEvent; }
+    get onConnectExternal() { bridgeLog.LogUnavailableApi("runtime.onConnectExternal"); return bridgeHelper.fakeEvent; }
+    get onRestartRequired() { bridgeLog.LogUnavailableApi("runtime.onRestartRequired"); return bridgeHelper.fakeEvent; }
+    get onStartup() { bridgeLog.LogUnavailableApi("runtime.onStartup"); return bridgeHelper.fakeEvent; }
+    get onSuspend() { bridgeLog.LogUnavailableApi("runtime.onSuspend"); return bridgeHelper.fakeEvent; }
+    get onSuspendCanceled() { bridgeLog.LogUnavailableApi("runtime.onSuspendCanceled"); return bridgeHelper.fakeEvent; }
+    get onUpdateAvailable() { bridgeLog.LogUnavailableApi("runtime.onUpdateAvailable"); return bridgeHelper.fakeEvent; }
     openOptionsPage(callback) {
         bridgeLog.DoActionAndLog(() => {
             var optionsPage = myBrowser.runtime.getManifest()["options_page"];
@@ -547,29 +547,29 @@ class EdgeChromeRuntimeBridge extends EdgeRuntimeBridge {
         }, "runtime.openOptionsPage", undefined, "tabs.create({ url: optionsPageUrl })");
     }
     connectNative(application) {
-        bridgeLog.LogUnavailbleApi("runtime.connectNative");
+        bridgeLog.LogUnavailableApi("runtime.connectNative");
         return null;
     }
     getPackageDirectoryEntry(callback) {
-        bridgeLog.LogUnavailbleApi("runtime.getPackageDirectoryEntry");
+        bridgeLog.LogUnavailableApi("runtime.getPackageDirectoryEntry");
     }
     getPlatformInfo(callback) {
-        bridgeLog.LogUnavailbleApi("runtime.getPlatformInfo");
+        bridgeLog.LogUnavailableApi("runtime.getPlatformInfo");
     }
     reload() {
-        bridgeLog.LogUnavailbleApi("runtime.reload");
+        bridgeLog.LogUnavailableApi("runtime.reload");
     }
     requestUpdateCheck(callback) {
-        bridgeLog.LogUnavailbleApi("runtime.requestUpdateCheck");
+        bridgeLog.LogUnavailableApi("runtime.requestUpdateCheck");
     }
     restart() {
-        bridgeLog.LogUnavailbleApi("runtime.restart");
+        bridgeLog.LogUnavailableApi("runtime.restart");
     }
     setUninstallURL(url, callback) {
-        bridgeLog.LogUnavailbleApi("runtime.setUninstallURL");
+        bridgeLog.LogUnavailableApi("runtime.setUninstallURL");
     }
     sendNativeMessage(application, message, responseCallback) {
-        bridgeLog.LogUnavailbleApi("runtime.sendNativeMessage");
+        bridgeLog.LogUnavailableApi("runtime.sendNativeMessage");
     }
 }
 class EdgeStorageBridge {
@@ -668,10 +668,10 @@ class EdgeTabsBridge {
     }
 }
 class EdgeChromeTabsBridge extends EdgeTabsBridge {
-    get onAttached() { bridgeLog.LogUnavailbleApi("tabs.onAttached"); return bridgeHelper.fakeEvent; }
-    get onDetached() { bridgeLog.LogUnavailbleApi("tabs.onDetached"); return bridgeHelper.fakeEvent; }
-    get onHighlighted() { bridgeLog.LogUnavailbleApi("tabs.onHighlighted"); return bridgeHelper.fakeEvent; }
-    get onMoved() { bridgeLog.LogUnavailbleApi("tabs.onMoved"); return bridgeHelper.fakeEvent; }
+    get onAttached() { bridgeLog.LogUnavailableApi("tabs.onAttached"); return bridgeHelper.fakeEvent; }
+    get onDetached() { bridgeLog.LogUnavailableApi("tabs.onDetached"); return bridgeHelper.fakeEvent; }
+    get onHighlighted() { bridgeLog.LogUnavailableApi("tabs.onHighlighted"); return bridgeHelper.fakeEvent; }
+    get onMoved() { bridgeLog.LogUnavailableApi("tabs.onMoved"); return bridgeHelper.fakeEvent; }
     get onSelectionChanged() {
         return bridgeLog.DoActionAndLog(() => {
             var fakeEvent = bridgeHelper.fakeEvent;
@@ -711,20 +711,20 @@ class EdgeChromeTabsBridge extends EdgeTabsBridge {
         }, "tabs.sendRequest", "tabs.sendMessage", "tabs.sendMessage");
     }
     captureVisibleTab(windowId, options, callback) {
-        bridgeLog.LogUnavailbleApi("tabs.captureVisibleTab");
+        bridgeLog.LogUnavailableApi("tabs.captureVisibleTab");
     }
     connect(tabId, connectInfo) {
-        bridgeLog.LogUnavailbleApi("tabs.connect");
+        bridgeLog.LogUnavailableApi("tabs.connect");
         return null;
     }
     highlight(highlightInfo, callback) {
-        bridgeLog.LogUnavailbleApi("tabs.highlight");
+        bridgeLog.LogUnavailableApi("tabs.highlight");
     }
     move(tabId, moveProperties, callback) {
-        bridgeLog.LogUnavailbleApi("tabs.move");
+        bridgeLog.LogUnavailableApi("tabs.move");
     }
     reload(tabId, reloadProperties, callback) {
-        bridgeLog.LogUnavailbleApi("tabs.reload");
+        bridgeLog.LogUnavailableApi("tabs.reload");
     }
 }
 class EdgeWebNavigationBridge {
@@ -819,7 +819,7 @@ class EdgeWindowsBridge {
 }
 class EdgeChromeWindowsBridge extends EdgeWindowsBridge {
     remove(windowId, callback) {
-        bridgeLog.LogUnavailbleApi("windows.remove");
+        bridgeLog.LogUnavailableApi("windows.remove");
     }
 }
 class EdgeBackgroundBridge {

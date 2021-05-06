@@ -66,7 +66,7 @@ a {
   overflow-x: hidden;
   padding: 5px 0;
   margin-top: 33px !important;
-  background-color: #fff;
+  background-color: var(--color-bg-canvas);
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
   border: 1px solid #ccc;
@@ -76,7 +76,26 @@ a {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
 }
 
+.batchRepoDropdownContainer {
+  z-index: 1000;
+  min-width: 280px;
+  padding: 5px 0;
+  background-color: var(--color-bg-canvas);
+}
+
+.batchIssuesContainer {
+  max-height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-radius: 4px;
+  border: 1px solid var(--color-text-primary);
+}
+
 .repoDropdown {
+  padding: 5px;
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  width: 100%;
   font-size: 14px;
   text-align: left;
   list-style: none;
@@ -96,6 +115,10 @@ a {
 
 .open > .dropdown-menu {
   display: block;
+}
+
+.message {
+  color: red;
 }
 
 .caret {
@@ -184,6 +207,14 @@ a {
 
 .modal-header .close {
   margin-top: -2px;
+}
+
+.closed {
+  display: none;
+}
+
+.open {
+  display: inline;
 }
 
 button.close {

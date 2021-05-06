@@ -3,21 +3,31 @@ var token = ''
 // repo list
 var repoList = []
 
+var intervalIds = []
+
+$(window).on('unload', () => {
+  intervalIds.forEach(clearInterval)
+  return
+})
+
 // don't try to re initialize the extension if there's a token in memory
 if (token === '') {
   // load jquery via JS
   $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js', () => {
-    setInterval(() => {
+    intervalIds.push(setInterval(() => {
       initializeExtension()
-    }, 1000)
+    }, 1000))
   })
 }
 
 function initializeExtension() {
   // if there's already a button on the screen, exit
-  if ($('.kaminoButton').length > 0) {
+  if ($('.kaminoButton').length > 0 || $('.batchButton').length > 0) {
+    intervalIds.forEach(clearInterval)
     return
   }
+
+  intervalIds.forEach(clearInterval)
 
   // the button
   const newBtn = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm, ''))
@@ -39,7 +49,8 @@ function initializeExtension() {
     urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/compare/`) < 0 &&
     urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/pull/`) < 0 &&
     urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/issues/new`) < 0 &&
-    $('.kaminoButton').length === 0
+    $('.kaminoButton').length === 0 &&
+    $('.batchButton').length === 0
   ) {
     // look for any applied issue filters
     saveAppliedFilters(urlObj)
@@ -95,7 +106,7 @@ function initializeExtension() {
     $('.noClone').click(() => {
       closeModal()
     })
-  }
+  } 
 }
 
 function saveAppliedFilters(urlObj) {
@@ -151,9 +162,7 @@ function saveAppliedFilters(urlObj) {
             {
               filters: item.filters,
             },
-            () => {
-              console.log('filters saved')
-            }
+            () => {}
           )
         }
       }
@@ -184,6 +193,7 @@ function getRepos(url) {
         return null
       }
     } else {
+      compileRepositoryList(repos.data)
       return null
     }
   })
@@ -206,7 +216,7 @@ function loadRepos() {
 
   // if there's no personal access token, disable the button
   if (token === '') {
-    console.log('disabling button because there is no Personal Access Token for authentication with Github')
+    console.warn('disabling button because there is no Personal Access Token for authentication with Github')
     $('.kaminoButton').prop('disabled', true)
     $('.quickClone').prop('disabled', true)
   }
@@ -242,7 +252,6 @@ function compileRepositoryList(list, searchTerm) {
 
         // filter out most used by search term
         if (searchTerm && searchTerm !== '') {
-          console.log('filtering most used: ', searchTerm)
           mostUsed = item.mostUsed.filter((item, index) => {
             return item.indexOf(searchTerm) > -1
           })
