@@ -84,9 +84,9 @@ function initializeBatchExtension() {
 
 function updateMessageText(message) {
   if(message === 'Done!') {
-    $('.message').text(`${message}...`)
-  } else {
     $('.message').text(message)
+  } else {
+    $('.message').text(`${message}...`)
   }
 }
 
