@@ -43,6 +43,10 @@ Kamino now supports a quick clone feature. The last repository you cloned to wil
 
 For those who have a large number of repositories, Kamino has now introduced a search feature. This can be used to filter the list of repositories quickly. Thanks to [@CamSoper](https://github.com/CamSoper) for the request!
 
+## Batch Cloning(EXPERIMENTAL!!!)
+
+For those who require the ability to clone multiple issues all at once to a repository, there is now a Batch Clone button on the issue list page. This will display a popup that asks where the issue(s) should be cloned and which issue(s) should be cloned. Again, this is a new feature(as of May 2021) and Kamino wasn't meant to do batch cloning, so use at your own risk but I appreciate any and all feedback.
+
 ### How does it work?
 
 Kamino leverages the GitHub API to gather information about the issue you are on. Kamino is a chrome extension utilizing content scripts to create a button on specific web pages, specifically GitHub issue pages.

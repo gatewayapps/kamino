@@ -48,7 +48,7 @@ class EdgeBridgeDebugLog {
         this.CatchOnException = true;
         this.VerboseLogging = true;
         this.FailedCalls = {};
-        this.SuccededCalls = {};
+        this.SucceededCalls = {};
         this.DeprecatedCalls = {};
         this.BridgedCalls = {};
         this.UnavailableApis = {};
@@ -94,7 +94,7 @@ class EdgeBridgeDebugLog {
         var result;
         try {
             result = action();
-            this.AddToCalledDictionary(this.SuccededCalls, name);
+            this.AddToCalledDictionary(this.SucceededCalls, name);
             if (typeof deprecatedTo !== "undefined" && typeof deprecatedTo !== "null") {
                 this.warn(`API Call Deprecated - Name: ${name}, Please use ${deprecatedTo} instead!"`);
                 this.AddToCalledDictionary(this.DeprecatedCalls, name);
@@ -117,7 +117,7 @@ class EdgeBridgeDebugLog {
         this.warn(message);
         this.AddToCalledDictionary(this.EdgeIssues, name);
     }
-    LogUnavailbleApi(name, deprecatedTo) {
+    LogUnavailableApi(name, deprecatedTo) {
         this.warn(`API Call '${name}' is not supported in Edge`);
         this.AddToCalledDictionary(this.UnavailableApis, name);
         if (typeof deprecatedTo !== "undefined" && typeof deprecatedTo !== "null") {
@@ -175,13 +175,13 @@ class EdgeChromeExtensionBridge extends EdgeExtensionBridge {
         }, "extension.sendRequest", "runtime.sendMessage", "runtime.sendMessage");
     }
     isAllowedFileSchemeAccess(callback) {
-        bridgeLog.LogUnavailbleApi("extension.isAllowedFileSchemeAccess");
+        bridgeLog.LogUnavailableApi("extension.isAllowedFileSchemeAccess");
     }
     isAllowedIncognitoAccess(callback) {
-        bridgeLog.LogUnavailbleApi("extension.isAllowedIncognitoAccess");
+        bridgeLog.LogUnavailableApi("extension.isAllowedIncognitoAccess");
     }
     setUpdateUrlData(data) {
-        bridgeLog.LogUnavailbleApi("extension.setUpdateUrlData");
+        bridgeLog.LogUnavailableApi("extension.setUpdateUrlData");
     }
 }
 class EdgeI18nBridge {
@@ -259,12 +259,12 @@ class EdgeRuntimeBridge {
     }
 }
 class EdgeChromeRuntimeBridge extends EdgeRuntimeBridge {
-    get onConnectExternal() { bridgeLog.LogUnavailbleApi("runtime.onConnectExternal"); return bridgeHelper.fakeEvent; }
-    get onRestartRequired() { bridgeLog.LogUnavailbleApi("runtime.onRestartRequired"); return bridgeHelper.fakeEvent; }
-    get onStartup() { bridgeLog.LogUnavailbleApi("runtime.onStartup"); return bridgeHelper.fakeEvent; }
-    get onSuspend() { bridgeLog.LogUnavailbleApi("runtime.onSuspend"); return bridgeHelper.fakeEvent; }
-    get onSuspendCanceled() { bridgeLog.LogUnavailbleApi("runtime.onSuspendCanceled"); return bridgeHelper.fakeEvent; }
-    get onUpdateAvailable() { bridgeLog.LogUnavailbleApi("runtime.onUpdateAvailable"); return bridgeHelper.fakeEvent; }
+    get onConnectExternal() { bridgeLog.LogUnavailableApi("runtime.onConnectExternal"); return bridgeHelper.fakeEvent; }
+    get onRestartRequired() { bridgeLog.LogUnavailableApi("runtime.onRestartRequired"); return bridgeHelper.fakeEvent; }
+    get onStartup() { bridgeLog.LogUnavailableApi("runtime.onStartup"); return bridgeHelper.fakeEvent; }
+    get onSuspend() { bridgeLog.LogUnavailableApi("runtime.onSuspend"); return bridgeHelper.fakeEvent; }
+    get onSuspendCanceled() { bridgeLog.LogUnavailableApi("runtime.onSuspendCanceled"); return bridgeHelper.fakeEvent; }
+    get onUpdateAvailable() { bridgeLog.LogUnavailableApi("runtime.onUpdateAvailable"); return bridgeHelper.fakeEvent; }
     openOptionsPage(callback) {
         bridgeLog.DoActionAndLog(() => {
             var optionsPage = myBrowser.runtime.getManifest()["options_page"];
@@ -278,29 +278,29 @@ class EdgeChromeRuntimeBridge extends EdgeRuntimeBridge {
         }, "runtime.openOptionsPage", undefined, "tabs.create({ url: optionsPageUrl })");
     }
     connectNative(application) {
-        bridgeLog.LogUnavailbleApi("runtime.connectNative");
+        bridgeLog.LogUnavailableApi("runtime.connectNative");
         return null;
     }
     getPackageDirectoryEntry(callback) {
-        bridgeLog.LogUnavailbleApi("runtime.getPackageDirectoryEntry");
+        bridgeLog.LogUnavailableApi("runtime.getPackageDirectoryEntry");
     }
     getPlatformInfo(callback) {
-        bridgeLog.LogUnavailbleApi("runtime.getPlatformInfo");
+        bridgeLog.LogUnavailableApi("runtime.getPlatformInfo");
     }
     reload() {
-        bridgeLog.LogUnavailbleApi("runtime.reload");
+        bridgeLog.LogUnavailableApi("runtime.reload");
     }
     requestUpdateCheck(callback) {
-        bridgeLog.LogUnavailbleApi("runtime.requestUpdateCheck");
+        bridgeLog.LogUnavailableApi("runtime.requestUpdateCheck");
     }
     restart() {
-        bridgeLog.LogUnavailbleApi("runtime.restart");
+        bridgeLog.LogUnavailableApi("runtime.restart");
     }
     setUninstallURL(url, callback) {
-        bridgeLog.LogUnavailbleApi("runtime.setUninstallURL");
+        bridgeLog.LogUnavailableApi("runtime.setUninstallURL");
     }
     sendNativeMessage(application, message, responseCallback) {
-        bridgeLog.LogUnavailbleApi("runtime.sendNativeMessage");
+        bridgeLog.LogUnavailableApi("runtime.sendNativeMessage");
     }
 }
 class EdgeStorageBridge {
