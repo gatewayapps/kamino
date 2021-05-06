@@ -183,8 +183,8 @@ function loadRepos() {
   $('.repoDropdown').empty()
 
   // add separator headers
-  $('.repoDropdown').append('<option class="dropdown-header dropdown-header-used">Last Used</option>')
-  $('.repoDropdown').append('<option class="dropdown-header dropdown-header-rest">The Rest</option>')
+  $('.repoDropdown').append('<option class="dropdown-header dropdown-header-used" disabled>Last Used</option>')
+  $('.repoDropdown').append('<option class="dropdown-header dropdown-header-rest" disabled>The Rest</option>')
 
   getRepos('https://api.github.com/user/repos?per_page=100').then(() => {})
 }
