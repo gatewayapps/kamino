@@ -4,9 +4,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
         chrome.tabs.executeScript(null, { file: "handlebars.runtime.min-v4.7.7.js", runAt: 'document_end' }, (h) => {
             chrome.tabs.executeScript(null, { file: "template.js", runAt: 'document_end' }, (h) => {
                 chrome.tabs.executeScript(null, { file: "app.js", runAt: 'document_end' }, (a) => {
-                    chrome.tabs.executeScript(null, { file: "batch.js", runAt: 'document_end' }, (b) => {
-                        chrome.tabs.insertCSS(null, { file: "css/style.css", runAt: 'document_end' })
-                    })
+                    chrome.tabs.insertCSS(null, { file: "css/style.css", runAt: 'document_end' })
                 })
             })
         })
