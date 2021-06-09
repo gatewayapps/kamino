@@ -99,7 +99,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://fred.dev"><img src="https://avatars3.githubusercontent.com/u/1170989?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Frédéric Harper</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3Afharper" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://maciejwalkowiak.com"><img src="https://avatars.githubusercontent.com/u/1357927?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Maciej Walkowiak</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=maciejwalkowiak" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/NathanWaddell121107"><img src="https://avatars.githubusercontent.com/u/45477581?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nathan Waddell</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=NathanWaddell121107" title="Code">💻</a></td>
-    <td align="center"><a href="https://daksh.eu.org"><img src="https://avatars.githubusercontent.com/u/43648146?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daksh P. Jain</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=Daksh777" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://daksh.eu.org"><img src="https://avatars.githubusercontent.com/u/43648146?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daksh P. Jain</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/commits?author=Daksh777" title="Documentation">📖</a> <a href="#ideas-Daksh777" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
