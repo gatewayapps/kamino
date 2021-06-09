@@ -6,7 +6,7 @@ Kamino is a Chrome and Edge Extension that creates a button on GitHub issue page
 
 ## How do I use it?
 
-In your Google Chrome browser, simply look for Kamino in the Chrome Extensions store and install. Once the extension is installed, go to `chrome://extensions` and click the `Options` link to enter your GitHub Personal Access Token(PAT). When creating your PAT, make sure to check the following:
+In your Google Chrome browser, simply look for Kamino in the Chrome Extensions store and install. Once the extension is installed, go to `chrome://extensions` and click the `Options` link to enter your [GitHub Personal Access Token (PAT)](https://github.com/settings/tokens). When creating your PAT, make sure to check the following:
 
 - `repo - all`
 
