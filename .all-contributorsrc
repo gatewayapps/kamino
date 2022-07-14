@@ -258,6 +258,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "thomas694",
+      "name": "Thomas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/71355143?v=4",
+      "profile": "http://email.thomas694 AT gmail DOT com",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
