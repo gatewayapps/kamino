@@ -355,16 +355,16 @@ function cloneOldIssueComments(newIssue, repo, url) {
           return Promise.resolve(null)
         }
 
-        const promises = []
-        comments.data.forEach((comment) => {
-          const c = {
-            body: comment.body,
-          }
-          promises.push(ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`))
-        })
-
-        Promise.all(promises).then((res) => {
-          return Promise.resolve({})
+        comments.data.reduce(
+          (p, comment) => p.then(_ => {
+            const c = {
+              body: comment.body,
+            }
+            return ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
+          }),
+          Promise.resolve()
+        ).then((res) => { 
+            return Promise.resolve({})
         })
       }
     )
