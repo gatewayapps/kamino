@@ -7,7 +7,7 @@
       "js": ["jquery/jquery-3.6.0.min.js", "handlebars.runtime.min-v4.7.7.js", "batch.js", "template.js"],
       "css": ["css/style.css"],
       "run_at": "document_end"
-    }, 
+    },
     {
       "matches": ["*://github.com/*/*/issues/*"],
       "exclude_matches": ["*://github.com/*/*/issues"],
@@ -28,7 +28,7 @@
   "name": "Kamino",
   "options_page": "options.html",
   "permissions": ["tabs", "background", "storage", "webNavigation", "*://github.com/*"],
-  "version": "3.0.0",
+  "version": "3.0.1",
   "web_accessible_resources": [
     "icons/*.png",
     "bootstrap/js/bootstrap.min.js",
