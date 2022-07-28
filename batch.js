@@ -10,16 +10,15 @@ $(window).on('unload', () => {
 
 // don't try to re initialize the extension if there's a token in memory
 if (batchToken === '') {
-  // load jquery via JS
-  $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js', () => {
-    batchIntervalIds.push(setInterval(() => {
+  batchIntervalIds.push(
+    setInterval(() => {
       initializeBatchExtension()
-    }, 1000))
-  })
+    }, 1000)
+  )
 }
 
 function initializeBatchExtension() {
-  if($('.kaminoButton').length > 0 || $('.batchButton').length > 0) {
+  if ($('.kaminoButton').length > 0 || $('.batchButton').length > 0) {
     batchIntervalIds.forEach(clearInterval)
     return
   }
@@ -30,13 +29,16 @@ function initializeBatchExtension() {
   const popup = $(Handlebars.templates.batchModal().replace(/(\r\n|\n|\r)/gm, ''))
   const urlObj = populateUrlMetadata()
 
-  if(urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/issues`) > -1 && urlObj.url.split('/').length < 7) {
+  if (
+    urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/issues`) > -1 &&
+    urlObj.url.split('/').length < 7
+  ) {
     // append button and modal to DOM
     $(newBtn).insertBefore($('div').find(`[id=filters-select-menu]`))
     $(popup).insertBefore($('div').find(`[id=filters-select-menu]`))
- 
+
     $(newBtn).click(() => {
-        openBatchModal()
+      openBatchModal()
     })
 
     chrome.storage.sync.get(
@@ -73,17 +75,17 @@ function initializeBatchExtension() {
     })
 
     $('.close').on('click', () => {
-        closeBatchModal()
+      closeBatchModal()
     })
 
     $('.noClone').on('click', () => {
-        closeBatchModal()
+      closeBatchModal()
     })
   }
 }
 
 function updateMessageText(message) {
-  if(message === 'Done!') {
+  if (message === 'Done!') {
     $('.message').text(message)
   } else {
     $('.message').text(`${message}...`)
@@ -105,11 +107,11 @@ function getIssues(url) {
         }
       })
       issues.data.forEach((item) => {
-        if(!item.pull_request) {
+        if (!item.pull_request) {
           addIssueToList(item.title, item.number)
         }
       })
-      
+
       if (nextLink) {
         return getIssues(nextLink)
       } else {
@@ -117,7 +119,7 @@ function getIssues(url) {
       }
     } else {
       issues.data.forEach((item) => {
-        if(!item.pull_request) {
+        if (!item.pull_request) {
           addIssueToList(item.title, item.number)
         }
       })
@@ -156,7 +158,9 @@ function getRepos(url) {
 }
 
 function loadIssues(urlObj) {
-  getIssues(`https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues?per_page=100`).then(() => {})
+  getIssues(`https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues?per_page=100`).then(
+    () => {}
+  )
 }
 
 function loadRepos() {
@@ -197,7 +201,6 @@ function compileRepositoryList(list, searchTerm) {
     (item) => {
       // check for a populated list
       if (item.mostUsed && item.mostUsed.length > 0) {
-
         // show used separator header
         $('.dropdown-header-used').addClass('active')
 
@@ -284,11 +287,11 @@ async function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
 
   // clone comments from old issue to new issue
   await cloneOldIssueComments(
-  response.data.number,
-  repo,
-  `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments?per_page=100`
+    response.data.number,
+    repo,
+    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments?per_page=100`
   )
-  
+
   // add a comment to the closed issue
   commentOnIssue(repo, oldIssue, response.data, closeOriginal)
 }
@@ -361,10 +364,10 @@ async function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
           comment,
           `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments`
         )
-          if (closeOriginal) {
-            // if success, close the existing issue
-            await closeGithubIssue(oldIssue)
-          }
+        if (closeOriginal) {
+          // if success, close the existing issue
+          await closeGithubIssue(oldIssue)
+        }
       }
     }
   )
@@ -434,7 +437,7 @@ function populateUrlMetadata() {
   const urlObject = {
     url: url,
     currentRepo: currentRepo,
-    organization: organization
+    organization: organization,
   }
 
   return urlObject

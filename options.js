@@ -4,7 +4,7 @@ function save_options() {
   const goToList = document.getElementById('go-to-issue-list').checked
   const createTab = document.getElementById('create-tab').checked
   const cloneComments = document.getElementById('clone-comments').checked
-  const disableCommentsOnOriginal = document.getElementById('disable-comment-on-original')
+  const disableCommentsOnOriginal = document.getElementById('disable-comment-on-original').checked
 
   chrome.storage.sync.set(
     {
