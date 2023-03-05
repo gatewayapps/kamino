@@ -106,7 +106,7 @@ function initializeExtension() {
     $('.noClone').click(() => {
       closeModal()
     })
-  } 
+  }
 }
 
 function saveAppliedFilters(urlObj) {
@@ -162,7 +162,7 @@ function saveAppliedFilters(urlObj) {
             {
               filters: item.filters,
             },
-            () => {}
+            () => { }
           )
         }
       }
@@ -211,7 +211,7 @@ function loadRepos() {
 
   // create a way to go to options without using the extension context menu
   $('.kamino-heading').click(() => {
-    chrome.runtime.sendMessage({ action: 'goToOptions' }, (response) => {})
+    chrome.runtime.sendMessage({ action: 'goToOptions' }, (response) => { })
   })
 
   // if there's no personal access token, disable the button
@@ -231,7 +231,7 @@ function loadRepos() {
   $('.repoDropdown').append('<li class="dropdown-header dropdown-header-used">Last Used</li>')
   $('.repoDropdown').append('<li class="dropdown-header dropdown-header-rest">The Rest</li>')
 
-  getRepos('https://api.github.com/user/repos?per_page=100').then(() => {})
+  getRepos('https://api.github.com/user/repos?per_page=100').then(() => { })
 }
 
 function compileRepositoryList(list, searchTerm) {
@@ -312,32 +312,45 @@ function getGithubIssue(repo, closeOriginal) {
     '',
     `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`
   ).then((issue) => {
-    // build new issue
-    const newIssue = {
-      title: issue.data.title,
-      body: `From ${urlObj.currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}  \n\n${issue.data.body}`,
-      labels: issue.data.labels,
-    }
-
-    createGithubIssue(newIssue, repo, issue.data, closeOriginal)
+    createGithubIssue(repo, issue.data, closeOriginal)
   })
 }
 
 // create the cloned GitHub issue
-function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
+function createGithubIssue(repo, oldIssue, closeOriginal) {
   const urlObj = populateUrlMetadata()
 
-  ajaxRequest('POST', newIssue, `https://api.github.com/repos/${repo}/issues`).then((response) => {
-    // clone comments from old issue to new issue
-    cloneOldIssueComments(
-      response.data.number,
-      repo,
-      `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments?per_page=100`
-    ).then((res) => {
-      // add a comment to the closed issue
-      commentOnIssue(repo, oldIssue, response.data, closeOriginal)
+  chrome.storage.sync.get(
+    {
+      preventReferences: false,
+    },
+    (item) => {
+      const newIssueBody = `From ${urlObj.currentRepo} created by [${oldIssue.user.login}](${oldIssue.user.html_url}): [${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}](https://github.com/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber})  \n\n${oldIssue.body}`;
+
+      // build new issue
+      const newIssue = {
+        title: oldIssue.title,
+        body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
+        labels: oldIssue.labels,
+      }
+
+      ajaxRequest('POST', newIssue, `https://api.github.com/repos/${repo}/issues`).then((response) => {
+        // clone comments from old issue to new issue
+        cloneOldIssueComments(
+          response.data.number,
+          repo,
+          `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}/comments?per_page=100`
+        ).then((res) => {
+          // add a comment to the closed issue
+          commentOnIssue(repo, oldIssue, response.data, closeOriginal)
+        })
+      })
     })
-  })
+}
+
+function preventReferences(text) {
+  // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
+  return text.replace(/https:\/\/github.com\//gi, "https://www.github.com/")
 }
 
 function cloneOldIssueComments(newIssue, repo, url) {
@@ -345,6 +358,7 @@ function cloneOldIssueComments(newIssue, repo, url) {
     chrome.storage.sync.get(
       {
         cloneComments: false,
+        preventReferences: false,
       },
       (item) => {
         if (!item.cloneComments) {
@@ -358,13 +372,13 @@ function cloneOldIssueComments(newIssue, repo, url) {
         comments.data.reduce(
           (p, comment) => p.then(_ => {
             const c = {
-              body: comment.body,
+              body: item.preventReferences ? preventReferences(comment.body) : comment.body,
             }
             return ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
           }),
           Promise.resolve()
-        ).then((res) => { 
-            return Promise.resolve({})
+        ).then((res) => {
+          return Promise.resolve({})
         })
       }
     )
@@ -382,7 +396,7 @@ function closeGithubIssue(oldIssue) {
     'PATCH',
     issueToClose,
     `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber}`
-  ).then((done) => {})
+  ).then((done) => { })
 }
 
 function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
@@ -426,7 +440,7 @@ function goToIssueList(repo, issueNumber, org, oldRepo) {
   // based on user settings, determines if the issues list will open after a clone or not
   chrome.runtime.sendMessage(
     { repo: repo, issueNumber: issueNumber, organization: org, oldRepo: oldRepo },
-    (response) => {}
+    (response) => { }
   )
 }
 
@@ -538,7 +552,7 @@ function addToMostUsed(repo) {
         {
           mostUsed: item.mostUsed,
         },
-        (done) => {}
+        (done) => { }
       )
     }
   )
