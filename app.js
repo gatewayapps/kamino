@@ -325,12 +325,14 @@ function createGithubIssue(repo, oldIssue, closeOriginal) {
       preventReferences: false,
     },
     (item) => {
-      const newIssueBody = `From ${urlObj.currentRepo} created by [${oldIssue.user.login}](${oldIssue.user.html_url}): [${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}](https://github.com/${urlObj.organization}/${urlObj.currentRepo}/issues/${urlObj.issueNumber})  \n\n${oldIssue.body}`;
+      const quotedOldBody = addBlockQuote(oldIssue.body)
+      const createdAtDate = oldIssue.created_at.split('T')[0];
+      const newBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** opened issue [${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}](${oldIssue.html_url}) on ${createdAtDate}:  \n\n${quotedOldBody}`
 
       // build new issue
       const newIssue = {
         title: oldIssue.title,
-        body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
+        body: item.preventReferences ? preventReferences(newBody) : newBody,
         labels: oldIssue.labels,
       }
 
@@ -346,11 +348,6 @@ function createGithubIssue(repo, oldIssue, closeOriginal) {
         })
       })
     })
-}
-
-function preventReferences(text) {
-  // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
-  return text.replace(/https:\/\/github.com\//gi, "https://www.github.com/")
 }
 
 function cloneOldIssueComments(newIssue, repo, url) {
@@ -371,8 +368,11 @@ function cloneOldIssueComments(newIssue, repo, url) {
 
         comments.data.reduce(
           (p, comment) => p.then(_ => {
+            const quotedOldBody = addBlockQuote(comment.body)
+            const createdAtDate = comment.created_at.split('T')[0];
+            const newBody = `**[<img src="https://avatars.githubusercontent.com/u/${comment.user.id}?s=17&v=4" width="17" height="17"> @${comment.user.login}](${comment.user.html_url})** commented [on ${createdAtDate}](${comment.html_url}): \n\n${quotedOldBody}`
             const c = {
-              body: item.preventReferences ? preventReferences(comment.body) : comment.body,
+              body: item.preventReferences ? preventReferences(newBody) : newBody,
             }
             return ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
           }),
@@ -587,4 +587,13 @@ function closeModal() {
 function openModal() {
   $('#kaminoModal').addClass('in')
   $('#kaminoModal').css('display', 'block')
+}
+
+function addBlockQuote(text) {
+  return text.replace(/^/gm, "> ")
+}
+
+function preventReferences(text) {
+  // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
+  return text.replace(/https:\/\/github.com\//gi, "https://www.github.com/")
 }
