@@ -323,16 +323,22 @@ function createGithubIssue(repo, oldIssue, closeOriginal) {
   chrome.storage.sync.get(
     {
       preventReferences: false,
+      preventMentions: false,
     },
     (item) => {
-      const quotedOldBody = addBlockQuote(oldIssue.body)
-      const createdAtDate = oldIssue.created_at.split('T')[0];
-      const newBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** opened issue [${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}](${oldIssue.html_url}) on ${createdAtDate}:  \n\n${quotedOldBody}`
-
+      const createdAtDate = oldIssue.created_at.split('T')[0]
+      newBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> ${oldIssue.user.login}](${oldIssue.user.html_url})** opened issue [${urlObj.organization}/${urlObj.currentRepo}#${urlObj.issueNumber}](${oldIssue.html_url}) on ${createdAtDate}:  \n\n`
+      newBody += addBlockQuote(oldIssue.body)
+      if (item.preventMentions) {
+        newBody = preventMentions(newBody)
+      }
+      if (item.preventReferences) {
+        newBody = preventReferences(newBody)
+      }
       // build new issue
       const newIssue = {
         title: oldIssue.title,
-        body: item.preventReferences ? preventReferences(newBody) : newBody,
+        body: newBody,
         labels: oldIssue.labels,
       }
 
@@ -356,6 +362,7 @@ function cloneOldIssueComments(newIssue, repo, url) {
       {
         cloneComments: false,
         preventReferences: false,
+        preventMentions: false,
       },
       (item) => {
         if (!item.cloneComments) {
@@ -368,11 +375,18 @@ function cloneOldIssueComments(newIssue, repo, url) {
 
         comments.data.reduce(
           (p, comment) => p.then(_ => {
-            const quotedOldBody = addBlockQuote(comment.body)
-            const createdAtDate = comment.created_at.split('T')[0];
-            const newBody = `**[<img src="https://avatars.githubusercontent.com/u/${comment.user.id}?s=17&v=4" width="17" height="17"> @${comment.user.login}](${comment.user.html_url})** commented [on ${createdAtDate}](${comment.html_url}): \n\n${quotedOldBody}`
+            const createdAtDate = comment.created_at.split('T')[0]
+
+            let newBody = `**[<img src="https://avatars.githubusercontent.com/u/${comment.user.id}?s=17&v=4" width="17" height="17"> ${comment.user.login}](${comment.user.html_url})** commented [on ${createdAtDate}](${comment.html_url}): \n\n`
+            newBody += addBlockQuote(comment.body)
+            if (item.preventMentions) {
+              newBody = preventMentions(newBody)
+            }
+            if (item.preventReferences) {
+              newBody = preventReferences(newBody)
+            }
             const c = {
-              body: item.preventReferences ? preventReferences(newBody) : newBody,
+              body: newBody,
             }
             return ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
           }),
@@ -596,4 +610,10 @@ function addBlockQuote(text) {
 function preventReferences(text) {
   // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
   return text.replace(/https:\/\/github.com\//gi, "https://www.github.com/")
+}
+
+function preventMentions(text) {
+  // replace "@githubusername" with a link to the user to avoid mention notifications
+  // regex from https://stackoverflow.com/a/30281147
+  return text.replace(/\B@([a-z0-9](?:-(?=[a-z0-9])|[a-z0-9]){0,38}(?<=[a-z0-9]))/gi, "[@**$1**](https://www.github.com/$1)")
 }
