@@ -357,45 +357,47 @@ function createGithubIssue(repo, oldIssue, closeOriginal) {
 }
 
 function cloneOldIssueComments(newIssue, repo, url) {
-  return ajaxRequest('GET', '', url).then((comments) => {
-    chrome.storage.sync.get(
-      {
-        cloneComments: false,
-        preventReferences: false,
-        preventMentions: false,
-      },
-      (item) => {
-        if (!item.cloneComments) {
-          return Promise.resolve(null)
+  return new Promise((cloningResolve, cloningReject) => {
+    ajaxRequest('GET', '', url).then((comments) => {
+      return chrome.storage.sync.get(
+        {
+          cloneComments: false,
+          preventReferences: false,
+          preventMentions: false,
+        },
+        (item) => {
+          if (!item.cloneComments) {
+            return Promise.resolve(null)
+          }
+
+          if (!comments || !comments.data || comments.data.length === 0) {
+            return Promise.resolve(null)
+          }
+
+          comments.data.reduce(
+            (p, comment) => p.then(_ => {
+              const createdAtDate = comment.created_at.split('T')[0]
+
+              let newBody = `**[<img src="https://avatars.githubusercontent.com/u/${comment.user.id}?s=17&v=4" width="17" height="17"> ${comment.user.login}](${comment.user.html_url})** commented [on ${createdAtDate}](${comment.html_url}): \n\n`
+              newBody += addBlockQuote(comment.body)
+              if (item.preventMentions) {
+                newBody = preventMentions(newBody)
+              }
+              if (item.preventReferences) {
+                newBody = preventReferences(newBody)
+              }
+              const c = {
+                body: newBody,
+              }
+              return ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
+            }),
+            Promise.resolve()
+          ).then((res) => {
+            cloningResolve()
+          })
         }
-
-        if (!comments || !comments.data || comments.data.length === 0) {
-          return Promise.resolve(null)
-        }
-
-        comments.data.reduce(
-          (p, comment) => p.then(_ => {
-            const createdAtDate = comment.created_at.split('T')[0]
-
-            let newBody = `**[<img src="https://avatars.githubusercontent.com/u/${comment.user.id}?s=17&v=4" width="17" height="17"> ${comment.user.login}](${comment.user.html_url})** commented [on ${createdAtDate}](${comment.html_url}): \n\n`
-            newBody += addBlockQuote(comment.body)
-            if (item.preventMentions) {
-              newBody = preventMentions(newBody)
-            }
-            if (item.preventReferences) {
-              newBody = preventReferences(newBody)
-            }
-            const c = {
-              body: newBody,
-            }
-            return ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
-          }),
-          Promise.resolve()
-        ).then((res) => {
-          return Promise.resolve({})
-        })
-      }
-    )
+      )
+    })
   })
 }
 
