@@ -4,5 +4,7 @@
         "Repos",
         "kamino",
         "linkstring"
-    ]
+    ],
+    "html.format.indentInnerHtml": true,
+    "html.format.wrapAttributes": "preserve"
 }
