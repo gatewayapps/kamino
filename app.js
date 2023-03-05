@@ -474,8 +474,20 @@ function ajaxRequest(type, data, url) {
             request.setRequestHeader('Authorization', `token ${token}`)
             request.setRequestHeader('Content-Type', 'application/json')
           },
+          error: (xhr, textStatus, errorThrown) => {
+            // retry on timeout or rate limit 403
+            if (textStatus === 'timeout' || (textStatus === 'error' && xhr.status === 403)) {
+              if (this.retryLimit > 0) {
+                this.retryLimit--
+                setTimeout(() => $.ajax(this), 1000)
+                return
+              }
+              return
+            }
+          },
           data: JSON.stringify(data),
           url: url,
+          retryLimit: 3,
         }).done((data, status, header) => {
           resolve({
             data: data,
