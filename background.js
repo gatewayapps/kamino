@@ -9,11 +9,15 @@ async function getCurrentTab() {
 chrome.webNavigation.onHistoryStateUpdated.addListener(async () => {
   const tab = await getCurrentTab()
 
-  chrome.scripting.executeScript({
-    files: ['jquery/jquery-3.6.0.min.js', 'handlebars.runtime.min-v4.7.7.js', 'template.js', 'app.js'],
-    target: { tabId: tab.id },
-  })
-  chrome.tabs.insertCSS('css/styles.css')
+  try {
+    chrome.scripting.executeScript({
+      files: ['jquery/jquery-3.6.0.min.js', 'handlebars.runtime.min-v4.7.7.js', 'template.js', 'app.js'],
+      target: { tabId: tab.id },
+    })
+    chrome.scripting.insertCSS({ files: ['./css/style.css'], target: { tabId: tab.id } })
+  } catch (ex) {
+    console.error(ex)
+  }
 })
 
 chrome.runtime.onInstalled.addListener((details) => {
