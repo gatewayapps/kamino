@@ -1,3 +1,6 @@
+const createFilters = require('./lib/createFilters')
+const populateUrlMetadata = require('./lib/populateUrlMetadata')
+
 var token = ''
 var repoList = []
 var intervalIds = []
@@ -18,7 +21,11 @@ if (token === '') {
 }
 
 function initializeExtension() {
-  const { currentRepo, issueNumber, organization, url } = populateUrlMetadata()
+  const { currentRepo, error, issueNumber, organization, url } = populateUrlMetadata(document.location.href)
+
+  if (error) {
+    return
+  }
 
   // if the page is a pull request page(view or create)
   // or the page is a new issue page
@@ -102,7 +109,7 @@ function saveAppliedFilters(urlMetadata) {
   if (url.indexOf('/issues') > 0 && isNaN(issueNumber)) {
     const querystring = url.substring(url.indexOf('/issues'))
 
-    var filter = {
+    var newFilter = {
       filter: querystring,
       organization,
       currentRepo,
@@ -113,34 +120,12 @@ function saveAppliedFilters(urlMetadata) {
         filters: [],
       },
       (item) => {
-        let exists = false
-        let changed = false
-
-        // convert the string to an empty array for existing users
-        if (typeof item.filters === 'string') {
-          item.filters = []
-        }
-
-        item.filters.forEach((f) => {
-          if (f.organization === filter.organization && f.currentRepo === filter.currentRepo) {
-            exists = true
-
-            if (f.filter !== filter.filter) {
-              changed = true
-              f.filter = filter.filter
-            }
-          }
-        })
-
-        if (!exists) {
-          changed = true
-          item.filters.push(filter)
-        }
+        const filters = createFilters(newFilter, item)
 
         // only save if changed, otherwise the max quota per minute will be exceeded throwing errors
         if (changed) {
           chrome.storage.sync.set({
-            filters: item.filters,
+            filters,
           })
         }
       }
@@ -270,7 +255,11 @@ function searchRepositories(searchTerm) {
 }
 
 async function getGithubIssue(repo, closeOriginal) {
-  const { currentRepo, issueNumber, organization } = populateUrlMetadata()
+  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+
+  if (error) {
+    return
+  }
 
   const response = await ajaxRequest(
     'GET',
@@ -288,7 +277,11 @@ async function getGithubIssue(repo, closeOriginal) {
 }
 
 async function createGithubIssue(newIssue, repo, closeOriginal) {
-  const { currentRepo, issueNumber, organization } = populateUrlMetadata()
+  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+
+  if (error) {
+    return
+  }
 
   const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
 
@@ -335,13 +328,22 @@ async function closeGithubIssue() {
     state: 'closed',
   }
 
-  const { currentRepo, issueNumber, organization } = populateUrlMetadata()
+  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+
+  if (error) {
+    return
+  }
 
   await ajaxRequest('PATCH', issueToClose, `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}`)
 }
 
 async function commentOnIssue(repo, newIssue, closeOriginal) {
-  const { currentRepo, issueNumber, organization } = populateUrlMetadata()
+  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+
+  if (error) {
+    return
+  }
+
   const newIssueLink = `[${repo}](${newIssue.html_url})`
   const comment = {
     body: closeOriginal
@@ -423,21 +425,6 @@ function addRepoToList(repoFullName, section) {
   $(`#${periodReplace}`).bind('click', () => {
     itemClick(repoFullName)
   })
-}
-
-function populateUrlMetadata() {
-  const url = document.location.href
-  const urlArray = url.split('/')
-  const currentRepo = urlArray[4]
-  const organization = urlArray[3]
-  const issueNumber = urlArray[urlArray.length - 1].replace('#', '')
-
-  return {
-    url,
-    currentRepo,
-    organization,
-    issueNumber,
-  }
 }
 
 function addToMostUsed(repo) {
