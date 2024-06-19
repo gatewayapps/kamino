@@ -270,6 +270,15 @@
       ]
     },
     {
+      "login": "liquidcms",
+      "name": "Peter Lindstrom",
+      "avatar_url": "https://avatars.githubusercontent.com/u/355815?v=4",
+      "profile": "http://www.liquidcms.ca",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
       "login": "patrickhlauke",
       "name": "Patrick H. Lauke",
       "avatar_url": "https://avatars.githubusercontent.com/u/895831?v=4",
