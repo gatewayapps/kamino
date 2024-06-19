@@ -4,14 +4,28 @@
     {
       "matches": ["*://github.com/*/*/issues"],
       "exclude_matches": ["*://github.com/*/*/issues/*"],
-      "js": ["./jquery/jquery-3.6.0.min.js", "./handlebars.runtime.min-v4.7.7.js", "./batch.js", "./template.js"],
+      "js": [
+        "./jquery/jquery-3.6.0.min.js",
+        "./handlebars.runtime.min-v4.7.7.js",
+        "./lib/populateUrlMetadata.js",
+        "./lib/createFilters.js",
+        "./batch.js",
+        "./template.js"
+      ],
       "css": ["./css/style.css"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://github.com/*/*/issues/*"],
       "exclude_matches": ["*://github.com/*/*/issues"],
-      "js": ["./jquery/jquery-3.6.0.min.js", "./handlebars.runtime.min-v4.7.7.js", "./app.js", "./template.js"],
+      "js": [
+        "./jquery/jquery-3.6.0.min.js",
+        "./handlebars.runtime.min-v4.7.7.js",
+        "./lib/populateUrlMetadata.js",
+        "./lib/createFilters.js",
+        "./app.js",
+        "./template.js"
+      ],
       "css": ["./css/style.css"],
       "run_at": "document_end"
     }
@@ -38,6 +52,8 @@
         "./css/options.css",
         "jquery/jquery-3.6.0.min.js",
         "handlebars.runtime.min-v4.7.7.js",
+        "lib/populateUrlMetadata.js",
+        "lib/createFilters.js",
         "template.js",
         "app.js",
         "options.html",
