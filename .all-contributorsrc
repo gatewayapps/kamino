@@ -277,6 +277,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "patrickhlauke",
+      "name": "Patrick H. Lauke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/895831?v=4",
+      "profile": "https://www.splintered.co.uk",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
