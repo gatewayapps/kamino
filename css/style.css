@@ -213,19 +213,20 @@ a {
   display: none;
 }
 
-.open {
-  display: inline;
+.sidebar-kamino .open {
+  display: block;
 }
 
 button.close {
   -webkit-appearance: none;
+  appearance: none;
   padding: 0;
   cursor: pointer;
   background: 0 0;
   border: 0;
 }
 
-.close {
+.modal-header .close {
   float: right;
   font-size: 21px;
   font-weight: 700;

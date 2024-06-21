@@ -1,6 +1,3 @@
-const createFilters = require('./lib/createFilters')
-const populateUrlMetadata = require('./lib/populateUrlMetadata')
-
 var token = ''
 var repoList = []
 var intervalIds = []
@@ -42,7 +39,6 @@ function initializeExtension() {
   }
 
   intervalIds.forEach(clearInterval)
-
   saveAppliedFilters({ currentRepo, issueNumber, organization, url })
 
   const kaminoButton = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm, ''))
@@ -120,7 +116,7 @@ function saveAppliedFilters(urlMetadata) {
         filters: [],
       },
       (item) => {
-        const filters = createFilters(newFilter, item)
+        const { filters, changed } = createFilters(newFilter, item)
 
         // only save if changed, otherwise the max quota per minute will be exceeded throwing errors
         if (changed) {
