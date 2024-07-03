@@ -263,37 +263,43 @@ async function getGithubIssue(repo, closeOriginal) {
   // Otherwise Kamino will not function
   await ajaxRequest('PATCH', { has_issues: true, name: repoName }, `${githubApiUrl}repos/${repo}`)
 
-  const response = await ajaxRequest(
+  const issue = await ajaxRequest(
     'GET',
     '',
     `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}`
   )
 
-  const newIssue = {
-    title: response.data.title,
-    body: `From ${currentRepo} created by [${response.data.user.login}](${response.data.user.html_url}): ${organization}/${currentRepo}#${issueNumber}  \n\n${response.data.body}`,
-    labels: response.data.labels,
-  }
-
-  await createGithubIssue(newIssue, repo, closeOriginal)
+  await createGithubIssue(repo, issue.data, closeOriginal)
 }
 
-async function createGithubIssue(newIssue, repo, closeOriginal) {
+async function createGithubIssue(repo, oldIssue, closeOriginal) {
   const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
 
   if (error) {
     return
   }
 
-  const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
+  chrome.storage.sync.get({ preventReferences: false }, async (item) => {
+    const newIssueBody = `From ${currentRepo} created by [${oldIssue.user.login}](${oldIssue.user.html_url}): [${organization}/${currentRepo}#${issueNumber}](https://github.com/${organization}/${currentRepo}/issues/${issueNumber}) \n\n${oldIssue.body}`
+    const newIssue = {
+      title: oldIssue.title,
+      body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
+      labels: oldIssue.labels,
+    }
+    const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
+    await cloneOldIssueComments(
+      response.data.number,
+      repo,
+      `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments?per_page=100`
+    )
 
-  await cloneOldIssueComments(
-    response.data.number,
-    repo,
-    `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments?per_page=100`
-  )
+    await commentOnIssue(repo, response.data, closeOriginal)
+  })
+}
 
-  await commentOnIssue(repo, response.data, closeOriginal)
+function preventReferences(text) {
+  // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
+  return text.replace(/https:\/\/github.com\//gi, 'https://www.github.com/')
 }
 
 async function cloneOldIssueComments(newIssue, repo, url) {
@@ -302,6 +308,7 @@ async function cloneOldIssueComments(newIssue, repo, url) {
   chrome.storage.sync.get(
     {
       cloneComments: false,
+      preventReferences: false,
     },
     (item) => {
       if (!item.cloneComments) {
@@ -315,7 +322,7 @@ async function cloneOldIssueComments(newIssue, repo, url) {
       response.data.reduce(async (previous, current) => {
         await previous
         const comment = {
-          body: current.body,
+          body: item.preventReferences ? preventReferences(current.body) : current.body,
         }
         return ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
       }, Promise.resolve())
