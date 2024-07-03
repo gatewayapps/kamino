@@ -261,7 +261,7 @@ async function getGithubIssue(repo, closeOriginal) {
 
   // Make the assumption that if users are using Kamino, then enable issues for the repo.
   // Otherwise Kamino will not function
-  await ajaxRequest('PATCH', { has_issues: true, name: repoName}, `${githubApiUrl}repos/${repo}`)
+  await ajaxRequest('PATCH', { has_issues: true, name: repoName }, `${githubApiUrl}repos/${repo}`)
 
   const response = await ajaxRequest(
     'GET',

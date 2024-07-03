@@ -18,7 +18,7 @@ describe('createFilter', () => {
       ],
     }
 
-    const {changed, filters} = createFilters(newFilter, existingFilters)
+    const { changed, filters } = createFilters(newFilter, existingFilters)
     expect(filters).toHaveLength(2)
     expect(changed).toBeTruthy()
     expect(filters[1].filter).toEqual('test-filter')
@@ -41,7 +41,7 @@ describe('createFilter', () => {
       ],
     }
 
-    const {changed, filters} = createFilters(newFilter, existingFilters)
+    const { changed, filters } = createFilters(newFilter, existingFilters)
     expect(filters).toHaveLength(1)
     expect(changed).toBeTruthy()
     expect(filters[0].filter).toEqual('test-filter')
@@ -64,7 +64,7 @@ describe('createFilter', () => {
       ],
     }
 
-    const {changed, filters} = createFilters(newFilter, existingFilters)
+    const { changed, filters } = createFilters(newFilter, existingFilters)
     expect(filters).toHaveLength(1)
     expect(changed).toEqual(false)
     expect(filters[0].filter).toEqual('test-filter')
