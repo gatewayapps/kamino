@@ -277,32 +277,40 @@ async function getGithubIssue(destinationRepo, issueNumber, closeOriginal) {
     `https://api.github.com/repos/${organization}/${currentRepo}/issues/${issueNumber}`
   )
 
-  // build new issue
-  const newIssue = {
-    title: issue.data.title,
-    body: `From ${currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${urlObj.organization}/${urlObj.currentRepo}#${issueNumber}  \n\n${issue.data.body}`,
-    labels: issue.data.labels,
-  }
   updateMessageText(`Creating issue #${issueNumber} at ${destinationRepo}`)
 
-  await createGithubIssue(newIssue, destinationRepo, issue.data, closeOriginal)
+  await createGithubIssue(destinationRepo, issue.data, closeOriginal)
 }
 
 // create the cloned GitHub issue
-async function createGithubIssue(newIssue, repo, oldIssue, closeOriginal) {
-  const urlObj = populateUrlMetadata()
+async function createGithubIssue(repo, oldIssue, closeOriginal) {
+  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata()
 
-  const response = await ajaxRequest('POST', newIssue, `https://api.github.com/repos/${repo}/issues`)
+  if (error) {
+    return
+  }
 
-  // clone comments from old issue to new issue
-  await cloneOldIssueComments(
-    response.data.number,
-    repo,
-    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments?per_page=100`
-  )
+  chrome.storage.sync.get({ preventReferences: false }, async (item) => {
+    const newIssueBody = `From ${currentRepo} created by [${oldIssue.user.login}](${oldIssue.user.html_url}): [${organization}/${currentRepo}#${issueNumber}](https://github.com/${organization}/${currentRepo}/issues/${issueNumber}) \n\n${oldIssue.body}`
+    const newIssue = {
+      title: oldIssue.title,
+      body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
+      labels: oldIssue.labels,
+    }
+    const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
+    await cloneOldIssueComments(
+      response.data.number,
+      repo,
+      `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments?per_page=100`
+    )
 
-  // add a comment to the closed issue
-  commentOnIssue(repo, oldIssue, response.data, closeOriginal)
+    await commentOnIssue(repo, response.data, closeOriginal)
+  })
+}
+
+function preventReferences(text) {
+  // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
+  return text.replace(/https:\/\/github.com\//gi, 'https://www.github.com/')
 }
 
 async function cloneOldIssueComments(newIssue, repo, url) {
