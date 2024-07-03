@@ -42,7 +42,7 @@
   "options_page": "options.html",
   "permissions": ["tabs", "background", "scripting", "storage", "webNavigation"],
   "host_permissions": ["*://github.com/*"],
-  "version": "4.0.1",
+  "version": "4.1.0",
   "web_accessible_resources": [
     {
       "resources": [

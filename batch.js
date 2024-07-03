@@ -260,18 +260,27 @@ function searchRepositories(searchTerm) {
 }
 
 async function getGithubIssue(destinationRepo, issueNumber, closeOriginal) {
-  const urlObj = populateUrlMetadata()
+  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata()
+
+  if (error) {
+    return
+  }
+  const repoName = repo.split('/')[1]
+
+  // Make the assumption that if users are using Kamino, then enable issues for the repo.
+  // Otherwise Kamino will not function
+  await ajaxRequest('PATCH', { has_issues: true, name: repoName}, `${githubApiUrl}repos/${repo}`)
 
   const issue = await ajaxRequest(
     'GET',
     '',
-    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${issueNumber}`
+    `https://api.github.com/repos/${organization}/${currentRepo}/issues/${issueNumber}`
   )
 
   // build new issue
   const newIssue = {
     title: issue.data.title,
-    body: `From ${urlObj.currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${urlObj.organization}/${urlObj.currentRepo}#${issueNumber}  \n\n${issue.data.body}`,
+    body: `From ${currentRepo} created by [${issue.data.user.login}](${issue.data.user.html_url}): ${urlObj.organization}/${urlObj.currentRepo}#${issueNumber}  \n\n${issue.data.body}`,
     labels: issue.data.labels,
   }
   updateMessageText(`Creating issue #${issueNumber} at ${destinationRepo}`)
