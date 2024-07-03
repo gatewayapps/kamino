@@ -9,6 +9,8 @@
         "./handlebars.runtime.min-v4.7.7.js",
         "./lib/populateUrlMetadata.js",
         "./lib/createFilters.js",
+        "./lib/addBlockQuote.js",
+        "./lib/preventReferences.js",
         "./batch.js",
         "./template.js"
       ],
@@ -23,6 +25,8 @@
         "./handlebars.runtime.min-v4.7.7.js",
         "./lib/populateUrlMetadata.js",
         "./lib/createFilters.js",
+        "./lib/addBlockQuote.js",
+        "./lib/preventReferences.js",
         "./app.js",
         "./template.js"
       ],
@@ -54,6 +58,8 @@
         "handlebars.runtime.min-v4.7.7.js",
         "lib/populateUrlMetadata.js",
         "lib/createFilters.js",
+        "lib/addBlockQuote.js",
+        "lib/preventReferences.js",
         "template.js",
         "app.js",
         "options.html",

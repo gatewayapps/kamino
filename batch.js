@@ -291,7 +291,10 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
   }
 
   chrome.storage.sync.get({ preventReferences: false }, async (item) => {
-    const newIssueBody = `From ${currentRepo} created by [${oldIssue.user.login}](${oldIssue.user.html_url}): [${organization}/${currentRepo}#${issueNumber}](https://github.com/${organization}/${currentRepo}/issues/${issueNumber}) \n\n${oldIssue.body}`
+    const blockQuoteOldBody = addBlockQuote(oldIssue.body)
+    const createdAt = oldIssue.created_at.split('T')[0]
+    const newIssueBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+
     const newIssue = {
       title: oldIssue.title,
       body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
@@ -308,17 +311,13 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
   })
 }
 
-function preventReferences(text) {
-  // replace "github.com" links with "www.github.com" links, which do not cause references on the original issue due to the "www" (see https://github.com/orgs/community/discussions/23123#discussioncomment-3239240)
-  return text.replace(/https:\/\/github.com\//gi, 'https://www.github.com/')
-}
-
 async function cloneOldIssueComments(newIssue, repo, url) {
   const comments = await ajaxRequest('GET', '', url)
 
   chrome.storage.sync.get(
     {
       cloneComments: false,
+      preventReferences: false,
     },
     async (item) => {
       if (!item.cloneComments) {
@@ -329,13 +328,16 @@ async function cloneOldIssueComments(newIssue, repo, url) {
         return null
       }
 
-      for (var comment of comments.data) {
-        const c = {
-          body: comment.body,
+      comments.data.reduce(async (previous, current) => {
+        await previous
+        const blockQuoteOldBody = addBlockQuote(current.body)
+        const createdAt = current.created_at.split('T')[0]
+        const newCommentBody = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> @${current.user.login}](${current.user.html_url})** commented [on ${createdAt}](${current.html_url}): \n\n${blockQuoteOldBody}`
+        const comment = {
+          body: item.preventReferences ? preventReferences(newCommentBody) : newCommentBody,
         }
-
-        await ajaxRequest('POST', c, `https://api.github.com/repos/${repo}/issues/${newIssue}/comments`)
-      }
+        return ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
+      }, Promise.resolve())
     }
   )
 }
@@ -443,21 +445,6 @@ function addRepoToList(repoFullName, section) {
       `<option data-toggle="modal" id="${periodReplace}" data-target="#batchModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></option>`
     )
   }
-}
-
-function populateUrlMetadata() {
-  var url = document.location.href
-  const urlArray = url.split('/')
-  const currentRepo = urlArray[4]
-  const organization = urlArray[3]
-
-  const urlObject = {
-    url: url,
-    currentRepo: currentRepo,
-    organization: organization,
-  }
-
-  return urlObject
 }
 
 function closeBatchModal() {
