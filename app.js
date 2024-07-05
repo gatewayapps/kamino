@@ -279,16 +279,25 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
     return
   }
 
-  chrome.storage.sync.get({ preventReferences: false }, async (item) => {
+  chrome.storage.sync.get({ preventReferences: false, preventMentions: false }, async (item) => {
     const blockQuoteOldBody = addBlockQuote(oldIssue.body)
     const createdAt = oldIssue.created_at.split('T')[0]
-    const newIssueBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+    let newIssueBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+
+    if (item.preventMentions) {
+      newIssueBody = preventMentions(newIssueBody)
+    }
+
+    if (item.preventReferences) {
+      newIssueBody = preventReferences(newIssueBody)
+    }
 
     const newIssue = {
       title: oldIssue.title,
-      body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
+      body: newIssueBody,
       labels: oldIssue.labels,
     }
+
     const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
     await cloneOldIssueComments(
       response.data.number,
@@ -307,6 +316,7 @@ async function cloneOldIssueComments(newIssue, repo, url) {
     {
       cloneComments: false,
       preventReferences: false,
+      preventMentions: false,
     },
     (item) => {
       if (!item.cloneComments) {
@@ -321,9 +331,18 @@ async function cloneOldIssueComments(newIssue, repo, url) {
         await previous
         const blockQuoteOldBody = addBlockQuote(current.body)
         const createdAt = current.created_at.split('T')[0]
-        const newCommentBody = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> @${current.user.login}](${current.user.html_url})** [commented](${current.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+        let newCommentBody = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> @${current.user.login}](${current.user.html_url})** [commented](${current.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+
+        if (item.preventMentions) {
+          newCommentBody = preventMentions(newCommentBody)
+        }
+
+        if (item.preventReferences) {
+          newCommentBody = preventReferences(newCommentBody)
+        }
+
         const comment = {
-          body: item.preventReferences ? preventReferences(newCommentBody) : newCommentBody,
+          body: newCommentBody,
         }
         return ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
       }, Promise.resolve())
