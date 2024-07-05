@@ -6,6 +6,7 @@ function save_options() {
   const cloneComments = document.getElementById('clone-comments').checked
   const disableCommentsOnOriginal = document.getElementById('disable-comment-on-original').checked
   const preventReferences = document.getElementById('prevent-references').checked
+  const preventMentions = document.getElementById('prevent-mentions').checked
 
   chrome.storage.sync.set(
     {
@@ -15,6 +16,7 @@ function save_options() {
       cloneComments,
       disableCommentsOnOriginal,
       preventReferences,
+      preventMentions,
     },
     function () {
       // Update status to let user know options were saved.
@@ -41,6 +43,7 @@ function restore_options() {
       cloneComments: false,
       disableCommentsOnOriginal: false,
       preventReferences: false,
+      preventMentions: false,
     },
     function (items) {
       document.getElementById('github-pat').value = items.githubToken
@@ -49,6 +52,7 @@ function restore_options() {
       document.getElementById('clone-comments').checked = items.cloneComments
       document.getElementById('disable-comment-on-original').checked = items.disableCommentsOnOriginal
       document.getElementById('prevent-references').checked = items.preventReferences
+      document.getElementById('prevent-mentions').checked = items.preventMentions
     }
   )
 }
