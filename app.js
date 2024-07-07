@@ -48,9 +48,16 @@ function initializeExtension() {
   }
   const modal = $(Handlebars.templates.modal(modalContext).replace(/(\r\n|\n|\r)/gm, ''))
 
-  $(kaminoButton).insertBefore($('.sidebar-assignee'))
-  $(modal).insertBefore($('.sidebar-assignee'))
-
+  if ($('.sidebar-assignee').length) {
+    // classic structure
+    $(kaminoButton).insertBefore($('.sidebar-assignee'))
+    $(modal).insertBefore($('.sidebar-assignee'))
+  } else if ($('.issue-viewer-metadata-pane > h2').length) {
+    // new issue/PR experience
+    $(kaminoButton).insertAfter($('.issue-viewer-metadata-pane > h2'))
+    $(modal).insertAfter($('.issue-viewer-metadata-pane > h2'))
+  }
+  
   const kaminoButtonExists = $('.kaminoButton').length > 0
   $('.btn-group').removeClass('open')
 
