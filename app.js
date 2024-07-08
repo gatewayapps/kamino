@@ -59,7 +59,7 @@ function initializeExtension() {
   }
   
   const kaminoButtonExists = $('.kaminoButton').length > 0
-  $('.btn-group').removeClass('open')
+  $('.sidebar-kamino .btn-group').removeClass('open')
 
   chrome.storage.sync.get(
     {
@@ -479,10 +479,10 @@ function addToMostUsed(repo) {
 }
 
 function openDropdown() {
-  if ($('.btn-group').hasClass('open')) {
-    $('.btn-group').removeClass('open')
+  if ($('.sidebar-kamino .btn-group').hasClass('open')) {
+    $('.sidebar-kamino .btn-group').removeClass('open')
   } else {
-    $('.btn-group').addClass('open')
+    $('.sidebar-kamino .btn-group').addClass('open')
   }
 }
 
