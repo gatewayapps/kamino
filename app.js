@@ -48,11 +48,18 @@ function initializeExtension() {
   }
   const modal = $(Handlebars.templates.modal(modalContext).replace(/(\r\n|\n|\r)/gm, ''))
 
-  $(kaminoButton).insertBefore($('.sidebar-assignee'))
-  $(modal).insertBefore($('.sidebar-assignee'))
-
+  if ($('.sidebar-assignee').length) {
+    // classic structure
+    $(kaminoButton).insertBefore($('.sidebar-assignee'))
+    $(modal).insertBefore($('.sidebar-assignee'))
+  } else if ($('[data-testid="issue-viewer-metadata-pane"] > h2').length) {
+    // new issue/PR experience
+    $(modal).insertAfter($('[data-testid="issue-viewer-metadata-pane"] > h2:first-of-type'))
+    $(kaminoButton).insertAfter($('[data-testid="issue-viewer-metadata-pane"] > h2:first-of-type'))
+  }
+  
   const kaminoButtonExists = $('.kaminoButton').length > 0
-  $('.btn-group').removeClass('open')
+  $('.sidebar-kamino .btn-group').removeClass('open')
 
   chrome.storage.sync.get(
     {
@@ -472,10 +479,10 @@ function addToMostUsed(repo) {
 }
 
 function openDropdown() {
-  if ($('.btn-group').hasClass('open')) {
-    $('.btn-group').removeClass('open')
+  if ($('.sidebar-kamino .btn-group').hasClass('open')) {
+    $('.sidebar-kamino .btn-group').removeClass('open')
   } else {
-    $('.btn-group').addClass('open')
+    $('.sidebar-kamino .btn-group').addClass('open')
   }
 }
 
