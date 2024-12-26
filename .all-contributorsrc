@@ -304,6 +304,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "MohammadLotfiA",
+      "name": "Mohammad Lotfi Akbarabadi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87372623?v=4",
+      "profile": "https://mohammadlotfi.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

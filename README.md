@@ -109,6 +109,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="http://www.liquidcms.ca"><img src="https://avatars.githubusercontent.com/u/355815?v=4?s=100" width="100px;" alt="Peter Lindstrom"/><br /><sub><b>Peter Lindstrom</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3Aliquidcms" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.splintered.co.uk"><img src="https://avatars.githubusercontent.com/u/895831?v=4?s=100" width="100px;" alt="Patrick H. Lauke"/><br /><sub><b>Patrick H. Lauke</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3Apatrickhlauke" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://kiwix.org"><img src="https://avatars.githubusercontent.com/u/1029718?v=4?s=100" width="100px;" alt="Kelson"/><br /><sub><b>Kelson</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3Akelson42" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://mohammadlotfi.com"><img src="https://avatars.githubusercontent.com/u/87372623?v=4?s=100" width="100px;" alt="Mohammad Lotfi Akbarabadi"/><br /><sub><b>Mohammad Lotfi Akbarabadi</b></sub></a><br /><a href="https://github.com/gatewayapps/kamino/issues?q=author%3AMohammadLotfiA" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
