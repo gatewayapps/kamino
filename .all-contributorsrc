@@ -295,6 +295,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "kelson42",
+      "name": "Kelson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1029718?v=4",
+      "profile": "https://kiwix.org",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
