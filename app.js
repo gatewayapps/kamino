@@ -48,8 +48,19 @@ function initializeExtension() {
   }
   const modal = $(Handlebars.templates.modal(modalContext).replace(/(\r\n|\n|\r)/gm, ''))
 
-  $(kaminoButton).insertBefore($('.sidebar-assignee'))
-  $(modal).insertBefore($('.sidebar-assignee'))
+  let targetElement;
+
+  if ($('.sidebar-assignee').length) {
+    targetElement = $('.sidebar-assignee');
+  } else if ($('[data-testid="sidebar-section"]').length) {
+    targetElement = $('[data-testid="sidebar-section"]').first();
+  } else {
+    console.warn("It appears GitHub has changed their page structure, preventing the Kamino button from being rendered. Please go to https://github.com/gatewayapps/kamino and create an issue and we will try to remedy the issue as quickly as possible. Thanks");
+    return;
+  }
+
+  $(kaminoButton).insertBefore(targetElement)
+  $(modal).insertBefore(targetElement)
 
   const kaminoButtonExists = $('.kaminoButton').length > 0
   $('.btn-group').removeClass('open')
