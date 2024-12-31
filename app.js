@@ -291,9 +291,10 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
   }
 
   chrome.storage.sync.get({ preventReferences: false }, async (item) => {
-    const blockQuoteOldBody = addBlockQuote(oldIssue.body)
+    const blockQuoteOldBody = oldIssue.body ? addBlockQuote(oldIssue.body) : '';
     const createdAt = oldIssue.created_at.split('T')[0]
-    const newIssueBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+    const newIssueBody = oldIssue.body ? `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
+    : ``
 
     const newIssue = {
       title: oldIssue.title,
