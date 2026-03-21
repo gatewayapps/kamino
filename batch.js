@@ -282,6 +282,14 @@ async function getGithubIssue(destinationRepo, issueNumber, closeOriginal) {
   await createGithubIssue(destinationRepo, issue.data, closeOriginal)
 }
 
+
+// Get the addBlockquote setting from storage
+async function getAddBlockquoteSetting() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get({ addBlockquote: true }, (item) => {
+      resolve(item.addBlockquote)
+    })
+  })
 // create the cloned GitHub issue
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
   const { currentRepo, error, issueNumber, organization } = populateUrlMetadata()
@@ -291,7 +299,7 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
   }
 
   chrome.storage.sync.get({ preventReferences: false }, async (item) => {
-    const blockQuoteOldBody = addBlockQuote(oldIssue.body)
+    const blockQuoteOldBody = await getAddBlockquoteSetting() ? addBlockQuote(oldIssue.body) : oldIssue.body
     const createdAt = oldIssue.created_at.split('T')[0]
     const newIssueBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
 
@@ -330,7 +338,7 @@ async function cloneOldIssueComments(newIssue, repo, url) {
 
       comments.data.reduce(async (previous, current) => {
         await previous
-        const blockQuoteOldBody = addBlockQuote(current.body)
+        const blockQuoteOldBody = await getAddBlockquoteSetting() ? addBlockQuote(current.body) : current.body
         const createdAt = current.created_at.split('T')[0]
         const newCommentBody = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> @${current.user.login}](${current.user.html_url})** commented [on ${createdAt}](${current.html_url}): \n\n${blockQuoteOldBody}`
         const comment = {
