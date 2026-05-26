@@ -46,7 +46,7 @@
   "options_page": "options.html",
   "permissions": ["background", "scripting", "storage", "webNavigation"],
   "host_permissions": ["*://github.com/*"],
-  "version": "4.1.2",
+  "version": "4.2.0",
   "web_accessible_resources": [
     {
       "resources": [
