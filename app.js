@@ -312,6 +312,14 @@ function applyCloneTextOptions(text, options) {
   return updatedText
 }
 
+function formatClonedBody(body, options) {
+  if (!body) {
+    return ''
+  }
+
+  return options.addBlockquote ? addBlockQuote(body) : body
+}
+
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
   const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
 
@@ -320,13 +328,14 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
   }
 
   const options = await getSyncStorage({
+    addBlockquote: true,
     preventMentions: false,
     preventReferences: false,
   })
-  const blockQuoteOldBody = oldIssue.body ? addBlockQuote(oldIssue.body) : ''
+  const clonedBody = formatClonedBody(oldIssue.body, options)
   const createdAt = getDatePart(oldIssue.created_at)
   const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> ${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}:`
-  const newIssueBody = `${attribution}${blockQuoteOldBody ? ` \n\n${blockQuoteOldBody}` : ''}`
+  const newIssueBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
 
   const newIssue = {
     title: oldIssue.title,
@@ -347,6 +356,7 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
 
 async function cloneOldIssueComments(newIssue, repo, url) {
   const options = await getSyncStorage({
+    addBlockquote: true,
     cloneComments: false,
     preventMentions: false,
     preventReferences: false,
@@ -363,10 +373,10 @@ async function cloneOldIssueComments(newIssue, repo, url) {
   }
 
   for (const current of response.data) {
-    const blockQuoteOldBody = current.body ? addBlockQuote(current.body) : ''
+    const clonedBody = formatClonedBody(current.body, options)
     const createdAt = getDatePart(current.created_at)
     const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> ${current.user.login}](${current.user.html_url})** [commented](${current.html_url}) on ${createdAt}:`
-    const newCommentBody = `${attribution}${blockQuoteOldBody ? ` \n\n${blockQuoteOldBody}` : ''}`
+    const newCommentBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
     const comment = {
       body: applyCloneTextOptions(newCommentBody, options),
     }

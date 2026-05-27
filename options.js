@@ -5,6 +5,7 @@ function save_options() {
   const createTab = document.getElementById('create-tab').checked
   const cloneComments = document.getElementById('clone-comments').checked
   const disableCommentsOnOriginal = document.getElementById('disable-comment-on-original').checked
+  const addBlockquote = document.getElementById('add-blockquote').checked
   const preventReferences = document.getElementById('prevent-references').checked
   const preventMentions = document.getElementById('prevent-mentions').checked
 
@@ -15,6 +16,7 @@ function save_options() {
       createTab,
       cloneComments,
       disableCommentsOnOriginal,
+      addBlockquote,
       preventMentions,
       preventReferences,
     },
@@ -42,6 +44,7 @@ function restore_options() {
       createTab: true,
       cloneComments: false,
       disableCommentsOnOriginal: false,
+      addBlockquote: true,
       preventMentions: false,
       preventReferences: false,
     },
@@ -51,6 +54,7 @@ function restore_options() {
       document.getElementById('create-tab').checked = items.createTab
       document.getElementById('clone-comments').checked = items.cloneComments
       document.getElementById('disable-comment-on-original').checked = items.disableCommentsOnOriginal
+      document.getElementById('add-blockquote').checked = items.addBlockquote
       document.getElementById('prevent-mentions').checked = items.preventMentions
       document.getElementById('prevent-references').checked = items.preventReferences
     }
