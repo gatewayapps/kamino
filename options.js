@@ -6,6 +6,7 @@ function save_options() {
   const cloneComments = document.getElementById('clone-comments').checked
   const disableCommentsOnOriginal = document.getElementById('disable-comment-on-original').checked
   const preventReferences = document.getElementById('prevent-references').checked
+  const preventMentions = document.getElementById('prevent-mentions').checked
 
   chrome.storage.sync.set(
     {
@@ -14,6 +15,7 @@ function save_options() {
       createTab,
       cloneComments,
       disableCommentsOnOriginal,
+      preventMentions,
       preventReferences,
     },
     function () {
@@ -40,6 +42,7 @@ function restore_options() {
       createTab: true,
       cloneComments: false,
       disableCommentsOnOriginal: false,
+      preventMentions: false,
       preventReferences: false,
     },
     function (items) {
@@ -48,6 +51,7 @@ function restore_options() {
       document.getElementById('create-tab').checked = items.createTab
       document.getElementById('clone-comments').checked = items.cloneComments
       document.getElementById('disable-comment-on-original').checked = items.disableCommentsOnOriginal
+      document.getElementById('prevent-mentions').checked = items.preventMentions
       document.getElementById('prevent-references').checked = items.preventReferences
     }
   )
