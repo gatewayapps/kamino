@@ -6,8 +6,10 @@ async function getCurrentTab() {
 }
 
 // used when Github uses push state.
-chrome.webNavigation.onHistoryStateUpdated.addListener(async () => {
-  const tab = await getCurrentTab()
+chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
+  if (details.frameId !== 0 || !details.url || !details.url.startsWith('https://github.com/')) {
+    return
+  }
 
   try {
     chrome.scripting.executeScript({
@@ -19,11 +21,13 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(async () => {
         'lib/createFilters.js',
         'lib/addBlockQuote.js',
         'lib/preventReferences.js',
+        'lib/preventMentions.js',
+        'batch.js',
         'app.js',
       ],
-      target: { tabId: tab.id },
+      target: { tabId: details.tabId },
     })
-    chrome.scripting.insertCSS({ files: ['./css/style.css'], target: { tabId: tab.id } })
+    chrome.scripting.insertCSS({ files: ['./css/style.css'], target: { tabId: details.tabId } })
   } catch (ex) {
     console.error(ex)
   }
