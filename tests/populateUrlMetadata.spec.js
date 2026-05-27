@@ -13,4 +13,12 @@ describe('populateUrlMetadata', () => {
     const urlMetadata = populateUrlMetadata('https://github.com/gatewayapps/kamino')
     expect(urlMetadata.error).toEqual('Cannot parse this url')
   })
+
+  it('takes a url with querystrings from the issue page and returns all metadata except for the issue number', () => {
+    const urlMetadata = populateUrlMetadata('https://github.com/gatewayapps/kamino/issues?q=is%3Aopen+is%3Aissue')
+    expect(urlMetadata.currentRepo).toEqual('kamino')
+    expect(urlMetadata.issueNumber).toEqual(undefined)
+    expect(urlMetadata.organization).toEqual('gatewayapps')
+    expect(urlMetadata.url).toEqual('https://github.com/gatewayapps/kamino/issues?q=is%3Aopen+is%3Aissue')
+  })
 })

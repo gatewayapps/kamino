@@ -116,6 +116,11 @@ function saveAppliedFilters(urlMetadata) {
   if (url.indexOf('/issues') > 0 && isNaN(issueNumber)) {
     const querystring = url.substring(url.indexOf('/issues'))
 
+    // another check to try and prevent a bad querystring from being added to filters
+    if (querystring.indexOf('?') === 0) {
+      return
+    }
+
     var newFilter = {
       filter: querystring,
       organization,

@@ -11,7 +11,16 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(async () => {
 
   try {
     chrome.scripting.executeScript({
-      files: ['jquery/jquery-3.6.0.min.js', 'handlebars.runtime.min-v4.7.7.js', 'template.js', 'app.js'],
+      files: [
+        'jquery/jquery-3.6.0.min.js',
+        'handlebars.runtime.min-v4.7.7.js',
+        'template.js',
+        'lib/populateUrlMetadata.js',
+        'lib/createFilters.js',
+        'lib/addBlockQuote.js',
+        'lib/preventReferences.js',
+        'app.js',
+      ],
       target: { tabId: tab.id },
     })
     chrome.scripting.insertCSS({ files: ['./css/style.css'], target: { tabId: tab.id } })
@@ -38,39 +47,39 @@ chrome.runtime.onMessage.addListener((request) => {
         createTab: true,
         filters: '',
       },
-      (item) => {
+      async (item) => {
         if (item.goToList) {
-          chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-            const filterList = typeof item.filters === 'string' ? [] : item.filters
+          const tabQuery = { currentWindow: true, active: true }
+          const tabs = await chrome.tabs.query(tabQuery)
+          const filterList = typeof item.filters === 'string' ? [] : item.filters
 
-            var f = filterList.filter((i) => {
-              return i.organization === request.organization && i.currentRepo === request.oldRepo
-            })
-
-            var filter = {
-              filter: '',
-            }
-            if (f && f.length > 0) {
-              filter = f[0]
-            }
-
-            setTimeout(() => {
-              if (item.createTab) {
-                chrome.tabs.create({
-                  url: `https://github.com/${request.repo}/issues/${request.issueNumber}`,
-                  selected: false,
-                })
-              }
-              chrome.tabs.update(tabs[0].id, {
-                url: `https://github.com/${request.organization}/${request.oldRepo}${filter.filter}`,
-                selected: true,
-              })
-            }, 1000)
+          var f = filterList.filter((i) => {
+            return i.organization === request.organization && i.currentRepo === request.oldRepo
           })
+
+          var filter = {
+            filter: '',
+          }
+          if (f && f.length > 0) {
+            filter = f[0]
+          }
+
+          setTimeout(async () => {
+            if (item.createTab) {
+              await chrome.tabs.create({
+                url: `https://github.com/${request.repo}/issues/${request.issueNumber}`,
+                selected: false,
+              })
+            }
+            await chrome.tabs.update(tabs[0].id, {
+              url: `https://github.com/${request.organization}/${request.oldRepo}${filter.filter}`,
+              selected: true,
+            })
+          }, 1000)
         } else {
           if (item.createTab) {
-            setTimeout(() => {
-              chrome.tabs.create({
+            setTimeout(async () => {
+              await chrome.tabs.create({
                 url: `https://github.com/${request.repo}/issues/${request.issueNumber}`,
                 selected: true,
               })
