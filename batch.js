@@ -2,6 +2,7 @@ var batchToken = ''
 var issueList = []
 var batchRepoList = []
 var batchIntervalIds = []
+var batchGithubApiUrl = 'https://api.github.com/'
 
 $(window).on('unload', () => {
   batchIntervalIds.forEach(clearInterval)
@@ -27,7 +28,7 @@ function initializeBatchExtension() {
 
   const newBtn = $(Handlebars.templates.batchButton().replace(/(\r\n|\n|\r)/gm, ''))
   const popup = $(Handlebars.templates.batchModal().replace(/(\r\n|\n|\r)/gm, ''))
-  const urlObj = populateUrlMetadata()
+  const urlObj = populateUrlMetadata(document.location.href)
 
   if (
     urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/issues`) > -1 &&
@@ -158,7 +159,7 @@ function getRepos(url) {
 }
 
 function loadIssues(urlObj) {
-  getIssues(`https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues?per_page=100`).then(
+  getIssues(`${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues?per_page=100`).then(
     () => {}
   )
 }
@@ -190,7 +191,7 @@ function loadRepos() {
   $('.repoDropdown').append('<option class="dropdown-header dropdown-header-used" disabled>Last Used</option>')
   $('.repoDropdown').append('<option class="dropdown-header dropdown-header-rest" disabled>The Rest</option>')
 
-  getRepos('https://api.github.com/user/repos?per_page=100').then(() => {})
+  getRepos(`${batchGithubApiUrl}user/repos?per_page=100`).then(() => {})
 }
 
 function compileRepositoryList(list, searchTerm) {
@@ -259,87 +260,129 @@ function searchRepositories(searchTerm) {
   compileRepositoryList(matches, searchTerm)
 }
 
-async function getGithubIssue(destinationRepo, issueNumber, closeOriginal) {
-  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata()
+async function getGithubIssue(destinationRepo, sourceIssueNumber, closeOriginal) {
+  const { currentRepo, error, organization } = populateUrlMetadata(document.location.href)
 
   if (error) {
     return
   }
-  const repoName = repo.split('/')[1]
+
+  const repoName = destinationRepo.split('/')[1]
 
   // Make the assumption that if users are using Kamino, then enable issues for the repo.
   // Otherwise Kamino will not function
-  await ajaxRequest('PATCH', { has_issues: true, name: repoName }, `${githubApiUrl}repos/${repo}`)
+  await ajaxRequest('PATCH', { has_issues: true, name: repoName }, `${batchGithubApiUrl}repos/${destinationRepo}`)
 
   const issue = await ajaxRequest(
     'GET',
     '',
-    `https://api.github.com/repos/${organization}/${currentRepo}/issues/${issueNumber}`
+    `${batchGithubApiUrl}repos/${organization}/${currentRepo}/issues/${sourceIssueNumber}`
   )
 
-  updateMessageText(`Creating issue #${issueNumber} at ${destinationRepo}`)
+  updateMessageText(`Creating issue #${sourceIssueNumber} at ${destinationRepo}`)
 
   await createGithubIssue(destinationRepo, issue.data, closeOriginal)
 }
 
+function getBatchSyncStorage(defaults) {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(defaults, resolve)
+  })
+}
+
+function getDatePart(timestamp) {
+  return timestamp ? timestamp.split('T')[0] : ''
+}
+
+function formatClonedBody(body, options) {
+  if (!body) {
+    return ''
+  }
+
+  return options.addBlockquote ? addBlockQuote(body) : body
+}
+
+function applyBatchCloneTextOptions(text, options) {
+  let updatedText = text
+
+  if (options.preventMentions) {
+    updatedText = preventMentions(updatedText)
+  }
+
+  if (options.preventReferences) {
+    updatedText = preventReferences(updatedText)
+  }
+
+  return updatedText
+}
+
 // create the cloned GitHub issue
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
-  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata()
+  const { currentRepo, error, organization } = populateUrlMetadata(document.location.href)
 
   if (error) {
     return
   }
 
-  chrome.storage.sync.get({ preventReferences: false }, async (item) => {
-    const blockQuoteOldBody = addBlockQuote(oldIssue.body)
-    const createdAt = oldIssue.created_at.split('T')[0]
-    const newIssueBody = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
-
-    const newIssue = {
-      title: oldIssue.title,
-      body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
-      labels: oldIssue.labels,
-    }
-    const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
-    await cloneOldIssueComments(
-      response.data.number,
-      repo,
-      `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments?per_page=100`
-    )
-
-    await commentOnIssue(repo, response.data, closeOriginal)
+  const options = await getBatchSyncStorage({
+    addBlockquote: true,
+    preventMentions: false,
+    preventReferences: false,
   })
+  const clonedBody = formatClonedBody(oldIssue.body, options)
+  const createdAt = getDatePart(oldIssue.created_at)
+  const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> ${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${oldIssue.number}](${oldIssue.html_url}) on ${createdAt}:`
+  const newIssueBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
+
+  const newIssue = {
+    title: oldIssue.title,
+    body: applyBatchCloneTextOptions(newIssueBody, options),
+    labels: oldIssue.labels,
+  }
+  const response = await ajaxRequest('POST', newIssue, `${batchGithubApiUrl}repos/${repo}/issues`)
+
+  await cloneOldIssueComments(
+    response.data.number,
+    repo,
+    `${batchGithubApiUrl}repos/${organization}/${currentRepo}/issues/${oldIssue.number}/comments?per_page=100`
+  )
+
+  await commentOnIssue(repo, oldIssue, response.data, closeOriginal)
+
+  return response
 }
 
 async function cloneOldIssueComments(newIssue, repo, url) {
+  const options = await getBatchSyncStorage({
+    addBlockquote: true,
+    cloneComments: false,
+    preventMentions: false,
+    preventReferences: false,
+  })
+
+  if (!options.cloneComments) {
+    return null
+  }
+
   const comments = await ajaxRequest('GET', '', url)
 
-  chrome.storage.sync.get(
-    {
-      cloneComments: false,
-      preventReferences: false,
-    },
-    async (item) => {
-      if (!item.cloneComments) {
-        return null
-      }
+  if (!comments || !comments.data || comments.data.length === 0) {
+    return comments
+  }
 
-      if (!comments || !comments.data || comments.data.length === 0) {
-        return null
-      }
-
-      comments.data.reduce(async (previous, current) => {
-        await previous
-        const blockQuoteOldBody = addBlockQuote(current.body)
-        const createdAt = current.created_at.split('T')[0]
-        const newCommentBody = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> @${current.user.login}](${current.user.html_url})** commented [on ${createdAt}](${current.html_url}): \n\n${blockQuoteOldBody}`
-        const comment = {
-          body: item.preventReferences ? preventReferences(newCommentBody) : newCommentBody,
-        }
-        return ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
-      }, Promise.resolve())
+  for (const current of comments.data) {
+    const clonedBody = formatClonedBody(current.body, options)
+    const createdAt = getDatePart(current.created_at)
+    const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> ${current.user.login}](${current.user.html_url})** commented [on ${createdAt}](${current.html_url}):`
+    const newCommentBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
+    const comment = {
+      body: applyBatchCloneTextOptions(newCommentBody, options),
     }
-  )
+
+    await ajaxRequest('POST', comment, `${batchGithubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
+  }
+
+  return comments
 }
 
 async function closeGithubIssue(oldIssue) {
@@ -347,19 +390,19 @@ async function closeGithubIssue(oldIssue) {
     state: 'closed',
   }
 
-  const urlObj = populateUrlMetadata()
+  const urlObj = populateUrlMetadata(document.location.href)
 
   updateMessageText(`Closing issue #${oldIssue.number}`)
   await ajaxRequest(
     'PATCH',
     issueToClose,
-    `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}`
+    `${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}`
   )
   updateMessageText(`Issue #${oldIssue.number} closed`)
 }
 
 async function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
-  const urlObj = populateUrlMetadata()
+  const urlObj = populateUrlMetadata(document.location.href)
   const newIssueLink = `[${repo}](${newIssue.html_url})`
   const comment = {
     body: closeOriginal
@@ -367,29 +410,21 @@ async function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
       : `Kamino cloned this issue to ${newIssueLink}`,
   }
 
-  chrome.storage.sync.get(
-    {
-      disableCommentsOnOriginal: false,
-    },
-    async (item) => {
-      if (item.disableCommentsOnOriginal) {
-        if (closeOriginal) {
-          // if success, close the existing issue
-          await closeGithubIssue(oldIssue)
-        }
-      } else {
-        await ajaxRequest(
-          'POST',
-          comment,
-          `https://api.github.com/repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments`
-        )
-        if (closeOriginal) {
-          // if success, close the existing issue
-          await closeGithubIssue(oldIssue)
-        }
-      }
-    }
-  )
+  const item = await getBatchSyncStorage({
+    disableCommentsOnOriginal: false,
+  })
+
+  if (!item.disableCommentsOnOriginal) {
+    await ajaxRequest(
+      'POST',
+      comment,
+      `${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments`
+    )
+  }
+
+  if (closeOriginal) {
+    await closeGithubIssue(oldIssue)
+  }
 }
 
 function ajaxRequest(type, data, url) {
