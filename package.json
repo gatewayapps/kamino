@@ -1,5 +1,9 @@
 {
   "scripts": {
+    "build": "node scripts/package-extension.js",
+    "package": "node scripts/package-extension.js",
+    "release:chrome": "node scripts/package-extension.js && node scripts/deploy-chrome-web-store.js --publish",
+    "upload:chrome": "node scripts/package-extension.js && node scripts/deploy-chrome-web-store.js",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {},

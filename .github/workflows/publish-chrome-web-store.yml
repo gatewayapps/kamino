@@ -1,0 +1,80 @@
+name: Publish Chrome Web Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Submit the uploaded package for Chrome Web Store review
+        required: true
+        type: boolean
+        default: true
+      staged:
+        description: Stage the release after approval instead of publishing immediately
+        required: true
+        type: boolean
+        default: false
+      skip_review:
+        description: Attempt to skip review for eligible changes
+        required: true
+        type: boolean
+        default: false
+      deploy_percentage:
+        description: Optional initial rollout percentage from 0 to 100
+        required: false
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+    env:
+      CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+      CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+      CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID || vars.CWS_EXTENSION_ID }}
+      CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID || vars.CWS_PUBLISHER_ID }}
+      CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+      - name: Jest Test
+        run: yarn test
+      - name: Package Extension
+        run: yarn build
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kamino-extension
+          path: dist/*.zip
+      - name: Upload to Chrome Web Store
+        env:
+          DEPLOY_PERCENTAGE: ${{ inputs.deploy_percentage }}
+          PUBLISH_EXTENSION: ${{ inputs.publish }}
+          SKIP_REVIEW: ${{ inputs.skip_review }}
+          STAGED_RELEASE: ${{ inputs.staged }}
+        run: |
+          args=()
+
+          if [[ "$PUBLISH_EXTENSION" == "true" ]]; then
+            args+=(--publish)
+          fi
+
+          if [[ "$STAGED_RELEASE" == "true" ]]; then
+            args+=(--staged)
+          fi
+
+          if [[ "$SKIP_REVIEW" == "true" ]]; then
+            args+=(--skip-review)
+          fi
+
+          if [[ -n "$DEPLOY_PERCENTAGE" ]]; then
+            args+=(--deploy-percentage "$DEPLOY_PERCENTAGE")
+          fi
+
+          node scripts/deploy-chrome-web-store.js "${args[@]}"

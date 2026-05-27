@@ -59,6 +59,62 @@ If you find an issue, feel free to create an issue here. If you think of a way K
 
 Outside of the use of your Personal Access Token used by Kamino to perform its core function, we do not have the ability to view or retrieve your token. We do not transmit any information stored by Kamino and it is all stored via the `chrome.storage` object provided by Google in the development of Chrome extensions. We do not collect or track any personal information such as addresses, IP address, name, emails, credit card numbers, etc... Any analytics package that may be installed will only be used to track number of uses as well as the way Kamino is being used. Any analytics package will NOT store or track repo names, tokens, issue numbers or names or anything else related to the GitHub data used by Kamino.
 
+## Release automation
+
+Kamino can be packaged and uploaded to the Chrome Web Store from the command line or from a manual GitHub Actions workflow. The automation uses the Chrome Web Store API v2 documented at https://developer.chrome.com/docs/webstore/using-api.
+
+### Package the extension
+
+```sh
+yarn build
+```
+
+This creates `dist/kamino-v<manifest version>.zip`, which is the package to upload to the Chrome Web Store. The build includes the extension runtime files and leaves out development-only files such as tests, `node_modules`, and Git metadata.
+
+Before uploading a release, update the `version` field in `manifest.json`; Chrome Web Store rejects uploads that do not increase the extension version.
+
+### Upload or publish locally
+
+Set these environment variables before uploading:
+
+- `CWS_CLIENT_ID`
+- `CWS_CLIENT_SECRET`
+- `CWS_REFRESH_TOKEN`
+- `CWS_PUBLISHER_ID`
+- `CWS_EXTENSION_ID`
+
+For local releases, you can put those values in a root `.env` file. `.env` is ignored by Git.
+
+Then run one of these commands:
+
+```sh
+yarn upload:chrome
+yarn release:chrome
+```
+
+`yarn upload:chrome` uploads the new zip but does not submit it for review. `yarn release:chrome` uploads the zip and submits it for review using the store item's existing visibility settings.
+
+The deploy script also supports:
+
+```sh
+node scripts/deploy-chrome-web-store.js --publish --staged
+node scripts/deploy-chrome-web-store.js --publish --skip-review
+node scripts/deploy-chrome-web-store.js --publish --deploy-percentage 25
+node scripts/deploy-chrome-web-store.js --dry-run
+```
+
+### GitHub Actions publishing
+
+The `Publish Chrome Web Store` workflow is intentionally manual. Add these repository secrets:
+
+- `CWS_CLIENT_ID`
+- `CWS_CLIENT_SECRET`
+- `CWS_REFRESH_TOKEN`
+- `CWS_PUBLISHER_ID`
+- `CWS_EXTENSION_ID`
+
+You can store `CWS_PUBLISHER_ID` and `CWS_EXTENSION_ID` as repository variables instead if preferred. The workflow runs tests, creates the zip artifact, uploads it to the Chrome Web Store, and optionally submits it for review.
+
 ## Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

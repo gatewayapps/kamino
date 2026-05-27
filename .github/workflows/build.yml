@@ -4,14 +4,27 @@ on:
   push:
     branches:
       - '**'
+  pull_request:
 
-jobs: 
+jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
       - name: Install Dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Jest Test
         run: yarn test
+      - name: Package Extension
+        run: yarn build
+      - name: Upload Extension Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: kamino-extension
+          path: dist/*.zip
