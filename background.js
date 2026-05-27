@@ -1,3 +1,7 @@
+if (typeof importScripts === 'function') {
+  importScripts('lib/populateUrlMetadata.js')
+}
+
 async function getCurrentTab() {
   let queryOptions = { active: true, lastFocusedWindow: true }
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
@@ -5,9 +9,21 @@ async function getCurrentTab() {
   return tab
 }
 
+function canRunKaminoOnUrl(url) {
+  if (!url) {
+    return false
+  }
+
+  return !populateUrlMetadata(url).error
+}
+
+function getGithubOrigin(request) {
+  return request.githubOrigin || 'https://github.com'
+}
+
 // used when Github uses push state.
 chrome.webNavigation.onHistoryStateUpdated.addListener(async (details) => {
-  if (details.frameId !== 0 || !details.url || !details.url.startsWith('https://github.com/')) {
+  if (details.frameId !== 0 || !canRunKaminoOnUrl(details.url)) {
     return
   }
 
@@ -45,6 +61,8 @@ chrome.runtime.onMessage.addListener((request) => {
   if (request.action && request.action === 'goToOptions') {
     chrome.tabs.create({ url: `chrome-extension://${chrome.runtime.id}/options.html`, selected: true })
   } else {
+    const githubOrigin = getGithubOrigin(request)
+
     chrome.storage.sync.get(
       {
         goToList: false,
@@ -58,7 +76,11 @@ chrome.runtime.onMessage.addListener((request) => {
           const filterList = typeof item.filters === 'string' ? [] : item.filters
 
           var f = filterList.filter((i) => {
-            return i.organization === request.organization && i.currentRepo === request.oldRepo
+            return (
+              (i.githubOrigin || 'https://github.com') === githubOrigin &&
+              i.organization === request.organization &&
+              i.currentRepo === request.oldRepo
+            )
           })
 
           var filter = {
@@ -71,12 +93,12 @@ chrome.runtime.onMessage.addListener((request) => {
           setTimeout(async () => {
             if (item.createTab) {
               await chrome.tabs.create({
-                url: `https://github.com/${request.repo}/issues/${request.issueNumber}`,
+                url: `${githubOrigin}/${request.repo}/issues/${request.issueNumber}`,
                 selected: false,
               })
             }
             await chrome.tabs.update(tabs[0].id, {
-              url: `https://github.com/${request.organization}/${request.oldRepo}${filter.filter}`,
+              url: `${githubOrigin}/${request.organization}/${request.oldRepo}${filter.filter}`,
               selected: true,
             })
           }, 1000)
@@ -84,7 +106,7 @@ chrome.runtime.onMessage.addListener((request) => {
           if (item.createTab) {
             setTimeout(async () => {
               await chrome.tabs.create({
-                url: `https://github.com/${request.repo}/issues/${request.issueNumber}`,
+                url: `${githubOrigin}/${request.repo}/issues/${request.issueNumber}`,
                 selected: true,
               })
             }, 1000)

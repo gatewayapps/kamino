@@ -21,6 +21,7 @@ describe('createFilter', () => {
     const { changed, filters } = createFilters(newFilter, existingFilters)
     expect(filters).toHaveLength(2)
     expect(changed).toBeTruthy()
+    expect(filters[0].filter).toEqual('another-filter')
     expect(filters[1].filter).toEqual('test-filter')
   })
 
@@ -68,5 +69,31 @@ describe('createFilter', () => {
     expect(filters).toHaveLength(1)
     expect(changed).toEqual(false)
     expect(filters[0].filter).toEqual('test-filter')
+  })
+
+  it('keeps filters separate for github enterprise hosts', () => {
+    const newFilter = {
+      filter: 'enterprise-filter',
+      githubOrigin: 'https://github.mycompany.com',
+      organization: 'gatewayapps',
+      currentRepo: 'kamino',
+    }
+
+    const existingFilters = {
+      filters: [
+        {
+          filter: 'github-filter',
+          githubOrigin: 'https://github.com',
+          organization: 'gatewayapps',
+          currentRepo: 'kamino',
+        },
+      ],
+    }
+
+    const { changed, filters } = createFilters(newFilter, existingFilters)
+    expect(filters).toHaveLength(2)
+    expect(changed).toBeTruthy()
+    expect(filters[0].filter).toEqual('github-filter')
+    expect(filters[1].filter).toEqual('enterprise-filter')
   })
 })

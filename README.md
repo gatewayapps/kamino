@@ -14,6 +14,8 @@ If you don't know how to create a PAT or need help, check out Creating a token s
 
 Once you have your PAT, enter it on the Options screen for Kamino and click `Save`. After that is done, go to any GitHub issue page in which you are a member and you should see a button labeled `Clone to`.
 
+Kamino also supports GitHub Enterprise Server hosts such as `https://github.mycompany.com`. For Enterprise use, create the PAT on that Enterprise host; Kamino will use that host's `/api/v3` API instead of `api.github.com`.
+
 # Features
 
 ## Settings
