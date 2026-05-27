@@ -283,6 +283,30 @@ async function getGithubIssue(repo, closeOriginal) {
   await createGithubIssue(repo, issue.data, closeOriginal)
 }
 
+function getSyncStorage(defaults) {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(defaults, resolve)
+  })
+}
+
+function getDatePart(timestamp) {
+  return timestamp ? timestamp.split('T')[0] : ''
+}
+
+function applyCloneTextOptions(text, options) {
+  let updatedText = text
+
+  if (options.preventMentions) {
+    updatedText = preventMentions(updatedText)
+  }
+
+  if (options.preventReferences) {
+    updatedText = preventReferences(updatedText)
+  }
+
+  return updatedText
+}
+
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
   const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
 
@@ -290,57 +314,60 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
     return
   }
 
-  chrome.storage.sync.get({ preventReferences: false }, async (item) => {
-    const blockQuoteOldBody = oldIssue.body ? addBlockQuote(oldIssue.body) : '';
-    const createdAt = oldIssue.created_at.split('T')[0]
-    const newIssueBody = oldIssue.body ? `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> @${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
-    : ``
-
-    const newIssue = {
-      title: oldIssue.title,
-      body: item.preventReferences ? preventReferences(newIssueBody) : newIssueBody,
-      labels: oldIssue.labels,
-    }
-    const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
-    await cloneOldIssueComments(
-      response.data.number,
-      repo,
-      `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments?per_page=100`
-    )
-
-    await commentOnIssue(repo, response.data, closeOriginal)
+  const options = await getSyncStorage({
+    preventMentions: false,
+    preventReferences: false,
   })
+  const blockQuoteOldBody = oldIssue.body ? addBlockQuote(oldIssue.body) : ''
+  const createdAt = getDatePart(oldIssue.created_at)
+  const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> ${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}:`
+  const newIssueBody = `${attribution}${blockQuoteOldBody ? ` \n\n${blockQuoteOldBody}` : ''}`
+
+  const newIssue = {
+    title: oldIssue.title,
+    body: applyCloneTextOptions(newIssueBody, options),
+    labels: oldIssue.labels,
+  }
+  const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
+  await cloneOldIssueComments(
+    response.data.number,
+    repo,
+    `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments?per_page=100`
+  )
+
+  await commentOnIssue(repo, response.data, closeOriginal)
+
+  return response
 }
 
 async function cloneOldIssueComments(newIssue, repo, url) {
+  const options = await getSyncStorage({
+    cloneComments: false,
+    preventMentions: false,
+    preventReferences: false,
+  })
+
+  if (!options.cloneComments) {
+    return null
+  }
+
   const response = await ajaxRequest('GET', '', url)
 
-  chrome.storage.sync.get(
-    {
-      cloneComments: false,
-      preventReferences: false,
-    },
-    (item) => {
-      if (!item.cloneComments) {
-        return null
-      }
+  if (!response || !response.data || response.data.length === 0) {
+    return response
+  }
 
-      if (!response || !response.data || response.data.length === 0) {
-        return null
-      }
-
-      response.data.reduce(async (previous, current) => {
-        await previous
-        const blockQuoteOldBody = addBlockQuote(current.body)
-        const createdAt = current.created_at.split('T')[0]
-        const newCommentBody = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> @${current.user.login}](${current.user.html_url})** [commented](${current.html_url}) on ${createdAt}: \n\n${blockQuoteOldBody}`
-        const comment = {
-          body: item.preventReferences ? preventReferences(newCommentBody) : newCommentBody,
-        }
-        return ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
-      }, Promise.resolve())
+  for (const current of response.data) {
+    const blockQuoteOldBody = current.body ? addBlockQuote(current.body) : ''
+    const createdAt = getDatePart(current.created_at)
+    const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> ${current.user.login}](${current.user.html_url})** [commented](${current.html_url}) on ${createdAt}:`
+    const newCommentBody = `${attribution}${blockQuoteOldBody ? ` \n\n${blockQuoteOldBody}` : ''}`
+    const comment = {
+      body: applyCloneTextOptions(newCommentBody, options),
     }
-  )
+
+    await ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)
+  }
 
   return response
 }
@@ -373,62 +400,89 @@ async function commentOnIssue(repo, newIssue, closeOriginal) {
       : `Kamino cloned this issue to ${newIssueLink}`,
   }
 
-  chrome.storage.sync.get(
-    {
-      disableCommentsOnOriginal: false,
-    },
-    async (item) => {
-      if (item.disableCommentsOnOriginal) {
-        if (closeOriginal) {
-          await closeGithubIssue()
-        }
-        goToIssueList(repo, newIssue.number, organization, currentRepo)
-      } else {
-        await ajaxRequest(
-          'POST',
-          comment,
-          `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments`
-        )
+  const item = await getSyncStorage({
+    disableCommentsOnOriginal: false,
+  })
 
-        if (closeOriginal) {
-          await closeGithubIssue()
-        }
-        goToIssueList(repo, newIssue.number, organization, currentRepo)
-      }
-    }
-  )
+  if (!item.disableCommentsOnOriginal) {
+    await ajaxRequest('POST', comment, `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}/comments`)
+  }
+
+  if (closeOriginal) {
+    await closeGithubIssue()
+  }
+
+  goToIssueList(repo, newIssue.number, organization, currentRepo)
 }
 
 function goToIssueList(repo, issueNumber, org, oldRepo) {
   chrome.runtime.sendMessage({ repo: repo, issueNumber: issueNumber, organization: org, oldRepo: oldRepo }, () => {})
 }
 
-async function ajaxRequest(type, data, url) {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(
-      {
-        githubToken: '',
-      },
-      (item) => {
-        token = item.githubToken
-        $.ajax({
-          type: type,
-          beforeSend: (request) => {
-            request.setRequestHeader('Authorization', `token ${token}`)
-            request.setRequestHeader('Content-Type', 'application/json')
-          },
-          data: JSON.stringify(data),
-          url: url,
-        }).done((data, status, header) => {
-          resolve({
-            data: data,
-            status: status,
-            header: header,
-          })
+function delay(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+}
+
+function shouldRetryAjax(xhr, textStatus) {
+  if (textStatus === 'timeout') {
+    return true
+  }
+
+  if (!xhr) {
+    return false
+  }
+
+  if ([429, 502, 503, 504].includes(xhr.status)) {
+    return true
+  }
+
+  return xhr.status === 403
+}
+
+function makeAjaxRequest(settings) {
+  return new Promise((resolve, reject) => {
+    $.ajax(settings)
+      .done((data, status, header) => {
+        resolve({
+          data: data,
+          status: status,
+          header: header,
         })
-      }
-    )
+      })
+      .fail((xhr, textStatus, errorThrown) => {
+        reject({ xhr, textStatus, errorThrown })
+      })
   })
+}
+
+async function ajaxRequest(type, data, url, options = {}) {
+  const item = await getSyncStorage({
+    githubToken: '',
+  })
+  const retryLimit = options.retryLimit ?? 3
+
+  token = item.githubToken
+
+  for (let attempt = 0; attempt <= retryLimit; attempt += 1) {
+    try {
+      return await makeAjaxRequest({
+        type: type,
+        beforeSend: (request) => {
+          request.setRequestHeader('Authorization', `token ${token}`)
+          request.setRequestHeader('Content-Type', 'application/json')
+        },
+        data: JSON.stringify(data),
+        timeout: options.timeout ?? 30000,
+        url: url,
+      })
+    } catch (error) {
+      if (attempt === retryLimit || !shouldRetryAjax(error.xhr, error.textStatus)) {
+        throw error
+      }
+
+      await delay(1000 * (attempt + 1))
+    }
+  }
 }
 
 function addRepoToList(repoFullName, section) {
