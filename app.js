@@ -24,6 +24,10 @@ function initializeExtension() {
     return
   }
 
+  if (!isIssueDetailUrl({ currentRepo, issueNumber, organization, url })) {
+    return
+  }
+
   // if the page is a pull request page(view or create)
   // or the page is a new issue page
   // or there is a Kamino button in the DOM, exit
@@ -107,6 +111,18 @@ function initializeExtension() {
   $('.noClone').click(() => {
     toggleModal(false)
   })
+}
+
+function isIssueDetailUrl(urlMetadata) {
+  try {
+    const issueUrl = new URL(urlMetadata.url)
+    return (
+      issueUrl.pathname === `/${urlMetadata.organization}/${urlMetadata.currentRepo}/issues/${urlMetadata.issueNumber}` &&
+      !isNaN(urlMetadata.issueNumber)
+    )
+  } catch {
+    return false
+  }
 }
 
 function saveAppliedFilters(urlMetadata) {

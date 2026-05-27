@@ -14,75 +14,98 @@ if (batchToken === '') {
   batchIntervalIds.push(
     setInterval(() => {
       initializeBatchExtension()
-    }, 1000)
+    }, 1000),
   )
 }
 
 function initializeBatchExtension() {
   if ($('.kaminoButton').length > 0 || $('.batchButton').length > 0) {
-    batchIntervalIds.forEach(clearInterval)
     return
   }
-
-  batchIntervalIds.forEach(clearInterval)
 
   const newBtn = $(Handlebars.templates.batchButton().replace(/(\r\n|\n|\r)/gm, ''))
   const popup = $(Handlebars.templates.batchModal().replace(/(\r\n|\n|\r)/gm, ''))
   const urlObj = populateUrlMetadata(document.location.href)
 
-  if (
-    urlObj.url.indexOf(`${urlObj.organization}/${urlObj.currentRepo}/issues`) > -1 &&
-    urlObj.url.split('/').length < 7
-  ) {
-    // append button and modal to DOM
-    $(newBtn).insertBefore($('div').find(`[id=filters-select-menu]`))
-    $(popup).insertBefore($('div').find(`[id=filters-select-menu]`))
-
-    $(newBtn).click(() => {
-      openBatchModal()
-    })
-
-    chrome.storage.sync.get(
-      {
-        githubToken: '',
-      },
-      (item) => {
-        batchToken = item.githubToken
-        loadIssues(urlObj)
-        loadRepos()
-      }
-    )
-
-    $('.cloneAndClose').on('click', async () => {
-      const repoName = $('.repoDropdown option:selected').text()
-
-      for (var item of $('.batchIssuesContainer > div > input:checked')) {
-        const issueNumber = $(item).attr('id')
-        updateMessageText(`Cloning issue #${issueNumber}`)
-        await getGithubIssue(repoName, issueNumber, true)
-      }
-      updateMessageText('Done!')
-    })
-
-    $('.cloneAndKeepOpen').on('click', async () => {
-      const repoName = $('.repoDropdown option:selected').text()
-
-      for (var item of $('.batchIssuesContainer > div > input:checked')) {
-        const issueNumber = $(item).attr('id')
-        updateMessageText(`Cloning issue #${issueNumber}`)
-        await getGithubIssue(repoName, issueNumber, false)
-      }
-      updateMessageText('Done!')
-    })
-
-    $('.close').on('click', () => {
-      closeBatchModal()
-    })
-
-    $('.noClone').on('click', () => {
-      closeBatchModal()
-    })
+  if (urlObj.error || !isIssueListUrl(urlObj)) {
+    return
   }
+
+  const mountTarget = getBatchMountTarget()
+
+  if (mountTarget.length === 0) {
+    return
+  }
+
+  $('#batchModal').remove()
+
+  // append button and modal to DOM
+  $(newBtn).insertBefore(mountTarget)
+  $(popup).insertBefore(mountTarget)
+
+  $(newBtn).click(() => {
+    openBatchModal()
+  })
+
+  chrome.storage.sync.get(
+    {
+      githubToken: '',
+    },
+    (item) => {
+      batchToken = item.githubToken
+      loadIssues(urlObj)
+      loadRepos()
+    },
+  )
+
+  $('.cloneAndClose').on('click', async () => {
+    const repoName = $('.repoDropdown option:selected').text()
+
+    for (var item of $('.batchIssuesContainer > div > input:checked')) {
+      const issueNumber = $(item).attr('id')
+      updateMessageText(`Cloning issue #${issueNumber}`)
+      await getGithubIssue(repoName, issueNumber, true)
+    }
+    updateMessageText('Done!')
+  })
+
+  $('.cloneAndKeepOpen').on('click', async () => {
+    const repoName = $('.repoDropdown option:selected').text()
+
+    for (var item of $('.batchIssuesContainer > div > input:checked')) {
+      const issueNumber = $(item).attr('id')
+      updateMessageText(`Cloning issue #${issueNumber}`)
+      await getGithubIssue(repoName, issueNumber, false)
+    }
+    updateMessageText('Done!')
+  })
+
+  $('.close').on('click', () => {
+    closeBatchModal()
+  })
+
+  $('.noClone').on('click', () => {
+    closeBatchModal()
+  })
+}
+
+function isIssueListUrl(urlObj) {
+  try {
+    const issueListUrl = new URL(urlObj.url)
+    return issueListUrl.pathname === `/${urlObj.organization}/${urlObj.currentRepo}/issues`
+  } catch {
+    return false
+  }
+}
+
+function getBatchMountTarget() {
+  const filterMenu = $('#filters-select-menu')
+
+  if (filterMenu.length > 0) {
+    return filterMenu
+  }
+
+  return $('[data-testid="issue-pr-toolbar"]').first()
 }
 
 function updateMessageText(message) {
@@ -159,9 +182,7 @@ function getRepos(url) {
 }
 
 function loadIssues(urlObj) {
-  getIssues(`${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues?per_page=100`).then(
-    () => {}
-  )
+  getIssues(`${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues?per_page=100`).then(() => {})
 }
 
 function loadRepos() {
@@ -241,7 +262,7 @@ function compileRepositoryList(list, searchTerm) {
       list.forEach((repo) => {
         addRepoToList(repo.full_name)
       })
-    }
+    },
   )
 }
 
@@ -276,7 +297,7 @@ async function getGithubIssue(destinationRepo, sourceIssueNumber, closeOriginal)
   const issue = await ajaxRequest(
     'GET',
     '',
-    `${batchGithubApiUrl}repos/${organization}/${currentRepo}/issues/${sourceIssueNumber}`
+    `${batchGithubApiUrl}repos/${organization}/${currentRepo}/issues/${sourceIssueNumber}`,
   )
 
   updateMessageText(`Creating issue #${sourceIssueNumber} at ${destinationRepo}`)
@@ -344,7 +365,7 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
   await cloneOldIssueComments(
     response.data.number,
     repo,
-    `${batchGithubApiUrl}repos/${organization}/${currentRepo}/issues/${oldIssue.number}/comments?per_page=100`
+    `${batchGithubApiUrl}repos/${organization}/${currentRepo}/issues/${oldIssue.number}/comments?per_page=100`,
   )
 
   await commentOnIssue(repo, oldIssue, response.data, closeOriginal)
@@ -396,7 +417,7 @@ async function closeGithubIssue(oldIssue) {
   await ajaxRequest(
     'PATCH',
     issueToClose,
-    `${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}`
+    `${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}`,
   )
   updateMessageText(`Issue #${oldIssue.number} closed`)
 }
@@ -418,7 +439,7 @@ async function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
     await ajaxRequest(
       'POST',
       comment,
-      `${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments`
+      `${batchGithubApiUrl}repos/${urlObj.organization}/${urlObj.currentRepo}/issues/${oldIssue.number}/comments`,
     )
   }
 
@@ -450,7 +471,7 @@ function ajaxRequest(type, data, url) {
             header: header,
           })
         })
-      }
+      },
     )
   })
 }
@@ -460,7 +481,7 @@ function addIssueToList(issueTitle, issueNumber) {
     `<div style='padding: 5px;'>
       <input type='checkbox' id='${issueNumber}' name='${issueTitle}'>
       <label for='issue-${issueNumber}'>#${issueNumber} - ${issueTitle}</label
-    </div>`
+    </div>`,
   )
 }
 
@@ -472,12 +493,12 @@ function addRepoToList(repoFullName, section) {
   if (section === 'used') {
     if ($(`#${periodReplace}`).length === 0) {
       $('.dropdown-header-rest').before(
-        `<option data-toggle="modal" id="${periodReplace}" data-target="#batchModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></option>`
+        `<option data-toggle="modal" id="${periodReplace}" data-target="#batchModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></option>`,
       )
     }
   } else {
     $('.repoDropdown').append(
-      `<option data-toggle="modal" id="${periodReplace}" data-target="#batchModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></option>`
+      `<option data-toggle="modal" id="${periodReplace}" data-target="#batchModal"><a class="repoItem" href="#" title="${repoFullName}">${repoFullName}</a></option>`,
     )
   }
 }
