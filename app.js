@@ -336,6 +336,34 @@ function formatClonedBody(body, options) {
   return options.addBlockquote ? addBlockQuote(body) : body
 }
 
+function createClonedIssueBody(oldIssue, sourceIssueReference, options) {
+  const clonedBody = formatClonedBody(oldIssue.body, options)
+
+  if (!options.addBlockquote) {
+    return applyCloneTextOptions(clonedBody, options)
+  }
+
+  const createdAt = getDatePart(oldIssue.created_at)
+  const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> ${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${sourceIssueReference}](${oldIssue.html_url}) on ${createdAt}:`
+  const newIssueBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
+
+  return applyCloneTextOptions(newIssueBody, options)
+}
+
+function createClonedCommentBody(comment, options) {
+  const clonedBody = formatClonedBody(comment.body, options)
+
+  if (!options.addBlockquote) {
+    return applyCloneTextOptions(clonedBody, options)
+  }
+
+  const createdAt = getDatePart(comment.created_at)
+  const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${comment.user.id}?s=17&v=4" width="17" height="17"> ${comment.user.login}](${comment.user.html_url})** [commented](${comment.html_url}) on ${createdAt}:`
+  const newCommentBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
+
+  return applyCloneTextOptions(newCommentBody, options)
+}
+
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
   const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
 
@@ -348,14 +376,10 @@ async function createGithubIssue(repo, oldIssue, closeOriginal) {
     preventMentions: false,
     preventReferences: false,
   })
-  const clonedBody = formatClonedBody(oldIssue.body, options)
-  const createdAt = getDatePart(oldIssue.created_at)
-  const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${oldIssue.user.id}?s=17&v=4" width="17" height="17"> ${oldIssue.user.login}](${oldIssue.user.html_url})** cloned issue [${organization}/${currentRepo}#${issueNumber}](${oldIssue.html_url}) on ${createdAt}:`
-  const newIssueBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
 
   const newIssue = {
     title: oldIssue.title,
-    body: applyCloneTextOptions(newIssueBody, options),
+    body: createClonedIssueBody(oldIssue, `${organization}/${currentRepo}#${issueNumber}`, options),
     labels: oldIssue.labels,
   }
   const response = await ajaxRequest('POST', newIssue, `${githubApiUrl}repos/${repo}/issues`)
@@ -389,12 +413,8 @@ async function cloneOldIssueComments(newIssue, repo, url) {
   }
 
   for (const current of response.data) {
-    const clonedBody = formatClonedBody(current.body, options)
-    const createdAt = getDatePart(current.created_at)
-    const attribution = `**[<img src="https://avatars.githubusercontent.com/u/${current.user.id}?s=17&v=4" width="17" height="17"> ${current.user.login}](${current.user.html_url})** [commented](${current.html_url}) on ${createdAt}:`
-    const newCommentBody = `${attribution}${clonedBody ? ` \n\n${clonedBody}` : ''}`
     const comment = {
-      body: applyCloneTextOptions(newCommentBody, options),
+      body: createClonedCommentBody(current, options),
     }
 
     await ajaxRequest('POST', comment, `${githubApiUrl}repos/${repo}/issues/${newIssue}/comments`)

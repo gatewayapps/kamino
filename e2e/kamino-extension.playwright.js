@@ -25,9 +25,11 @@ const repos = [
   { full_name: 'gatewayapps/target-repo' },
 ]
 
+const sourceIssueBody = ['## Template', '', '- [ ] Step one', '- [ ] Step two'].join('\n')
+
 const issues = [
   {
-    body: 'Issue body',
+    body: sourceIssueBody,
     created_at: '2026-01-01T00:00:00Z',
     html_url: 'https://github.com/gatewayapps/kamino/issues/123',
     labels: [],
@@ -66,10 +68,14 @@ async function jsonResponse(route, body) {
 }
 
 async function installMocks(context) {
-  await context.route('https://api.github.com/user/repos?**', (route) => jsonResponse(route, repos))
-  await context.route('https://api.github.com/repos/gatewayapps/kamino/issues?**', (route) => jsonResponse(route, issues))
-  await context.route('https://api.github.com/repos/gatewayapps/kamino/issues/123', (route) => jsonResponse(route, issues[0]))
   await context.route('https://api.github.com/repos/**', (route) => jsonResponse(route, {}))
+  await context.route('https://api.github.com/user/repos?**', (route) => jsonResponse(route, repos))
+  await context.route(/https:\/\/api\.github\.com\/repos\/gatewayapps\/kamino\/issues\?.*/, (route) =>
+    jsonResponse(route, issues)
+  )
+  await context.route(/https:\/\/api\.github\.com\/repos\/gatewayapps\/kamino\/issues\/123(?:\?.*)?$/, (route) =>
+    jsonResponse(route, issues[0])
+  )
 
   await context.route('https://github.com/**', (route) => {
     const url = new URL(route.request().url())
@@ -145,6 +151,16 @@ async function injectKaminoContentScripts(context, targetUrl, files = contentScr
   }, { files, targetUrl })
 }
 
+async function setExtensionStorage(context, values) {
+  const serviceWorker = context.serviceWorkers()[0] || (await context.waitForEvent('serviceworker'))
+
+  await serviceWorker.evaluate((values) => {
+    return new Promise((resolve) => {
+      chrome.storage.sync.set(values, resolve)
+    })
+  }, values)
+}
+
 test.describe('Kamino extension smoke tests', () => {
   let context
   let page
@@ -196,5 +212,50 @@ test.describe('Kamino extension smoke tests', () => {
     await page.locator('#batchModal').evaluate((element) => element.remove())
 
     await expect(page.locator('.batchButton')).toBeVisible()
+  })
+
+  test('preserves source markdown when source attribution and blockquotes are disabled', async ({}, testInfo) => {
+    context = await launchExtension(testInfo)
+
+    await setExtensionStorage(context, {
+      addBlockquote: false,
+      cloneComments: false,
+      createTab: false,
+      disableCommentsOnOriginal: true,
+      githubToken: 'token',
+      mostUsed: ['gatewayapps/target-repo'],
+    })
+
+    let resolveCreateIssueRequest
+    const createIssueRequest = new Promise((resolve) => {
+      resolveCreateIssueRequest = resolve
+    })
+    await context.route('https://api.github.com/repos/gatewayapps/target-repo/issues', async (route) => {
+      if (route.request().method() === 'POST') {
+        const createIssuePayload = route.request().postDataJSON()
+        resolveCreateIssueRequest(createIssuePayload)
+
+        await jsonResponse(route, {
+          html_url: 'https://github.com/gatewayapps/target-repo/issues/456',
+          number: 456,
+        })
+        return
+      }
+
+      await jsonResponse(route, {})
+    })
+
+    page = await context.newPage()
+    await page.goto('https://github.com/gatewayapps/kamino/issues/123')
+    await page.bringToFront()
+    await injectKaminoContentScripts(context, page.url(), appContentScriptFiles)
+
+    await expect(page.locator('.quickClone[data-repo="gatewayapps/target-repo"]')).toBeVisible()
+    await page.locator('.quickClone').click()
+    await page.locator('.cloneAndKeepOpen').click()
+
+    const createIssuePayload = await createIssueRequest
+
+    expect(createIssuePayload.body).toBe(sourceIssueBody)
   })
 })
