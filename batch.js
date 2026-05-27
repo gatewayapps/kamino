@@ -31,6 +31,8 @@ function initializeBatchExtension() {
     return
   }
 
+  batchGithubApiUrl = urlObj.githubApiUrl
+
   const mountTarget = getBatchMountTarget()
 
   if (mountTarget.length === 0) {
@@ -282,11 +284,15 @@ function searchRepositories(searchTerm) {
 }
 
 async function getGithubIssue(destinationRepo, sourceIssueNumber, closeOriginal) {
-  const { currentRepo, error, organization } = populateUrlMetadata(document.location.href)
+  const { currentRepo, error, githubApiUrl: currentGithubApiUrl, organization } = populateUrlMetadata(
+    document.location.href
+  )
 
   if (error) {
     return
   }
+
+  batchGithubApiUrl = currentGithubApiUrl
 
   const repoName = destinationRepo.split('/')[1]
 
@@ -367,11 +373,15 @@ function createClonedCommentBody(comment, options) {
 
 // create the cloned GitHub issue
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
-  const { currentRepo, error, organization } = populateUrlMetadata(document.location.href)
+  const { currentRepo, error, githubApiUrl: currentGithubApiUrl, organization } = populateUrlMetadata(
+    document.location.href
+  )
 
   if (error) {
     return
   }
+
+  batchGithubApiUrl = currentGithubApiUrl
 
   const options = await getBatchSyncStorage({
     addBlockquote: true,
@@ -433,6 +443,12 @@ async function closeGithubIssue(oldIssue) {
 
   const urlObj = populateUrlMetadata(document.location.href)
 
+  if (urlObj.error) {
+    return
+  }
+
+  batchGithubApiUrl = urlObj.githubApiUrl
+
   updateMessageText(`Closing issue #${oldIssue.number}`)
   await ajaxRequest(
     'PATCH',
@@ -444,6 +460,13 @@ async function closeGithubIssue(oldIssue) {
 
 async function commentOnIssue(repo, oldIssue, newIssue, closeOriginal) {
   const urlObj = populateUrlMetadata(document.location.href)
+
+  if (urlObj.error) {
+    return
+  }
+
+  batchGithubApiUrl = urlObj.githubApiUrl
+
   const newIssueLink = `[${repo}](${newIssue.html_url})`
   const comment = {
     body: closeOriginal

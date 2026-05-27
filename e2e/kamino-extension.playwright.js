@@ -19,6 +19,11 @@ const contentScriptFiles = [
 ]
 
 const appContentScriptFiles = contentScriptFiles.filter((file) => file !== 'batch.js')
+const githubOrigin = 'https://github.com'
+const githubApiOrigin = 'https://api.github.com'
+const enterpriseOrigin = 'https://github.mycompany.com'
+const enterpriseApiOrigin = `${enterpriseOrigin}/api/v3`
+const nonGithubOrigin = 'https://example.com'
 
 const repos = [
   { full_name: 'gatewayapps/kamino' },
@@ -31,13 +36,13 @@ const issues = [
   {
     body: sourceIssueBody,
     created_at: '2026-01-01T00:00:00Z',
-    html_url: 'https://github.com/gatewayapps/kamino/issues/123',
+    html_url: `${githubOrigin}/gatewayapps/kamino/issues/123`,
     labels: [],
     number: 123,
     pull_request: undefined,
     title: 'Issue 123',
     user: {
-      html_url: 'https://github.com/octocat',
+      html_url: `${githubOrigin}/octocat`,
       id: 583231,
       login: 'octocat',
     },
@@ -67,17 +72,24 @@ async function jsonResponse(route, body) {
   })
 }
 
-async function installMocks(context) {
-  await context.route('https://api.github.com/repos/**', (route) => jsonResponse(route, {}))
-  await context.route('https://api.github.com/user/repos?**', (route) => jsonResponse(route, repos))
-  await context.route(/https:\/\/api\.github\.com\/repos\/gatewayapps\/kamino\/issues\?.*/, (route) =>
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+async function installApiMocks(context, apiOrigin) {
+  await context.route(`${apiOrigin}/repos/**`, (route) => jsonResponse(route, {}))
+  await context.route(`${apiOrigin}/user/repos?**`, (route) => jsonResponse(route, repos))
+  await context.route(new RegExp(`${escapeRegex(apiOrigin)}/repos/gatewayapps/kamino/issues\\?.*`), (route) =>
     jsonResponse(route, issues)
   )
-  await context.route(/https:\/\/api\.github\.com\/repos\/gatewayapps\/kamino\/issues\/123(?:\?.*)?$/, (route) =>
-    jsonResponse(route, issues[0])
+  await context.route(
+    new RegExp(`${escapeRegex(apiOrigin)}/repos/gatewayapps/kamino/issues/123(?:\\?.*)?$`),
+    (route) => jsonResponse(route, issues[0])
   )
+}
 
-  await context.route('https://github.com/**', (route) => {
+async function installGithubPageMocks(context, githubOrigin) {
+  await context.route(`${githubOrigin}/**`, (route) => {
     const url = new URL(route.request().url())
     const isIssueDetail = url.pathname === '/gatewayapps/kamino/issues/123'
 
@@ -89,6 +101,14 @@ async function installMocks(context) {
       }),
     })
   })
+}
+
+async function installMocks(context) {
+  await installGithubPageMocks(context, githubOrigin)
+  await installGithubPageMocks(context, enterpriseOrigin)
+  await installGithubPageMocks(context, nonGithubOrigin)
+  await installApiMocks(context, githubApiOrigin)
+  await installApiMocks(context, enterpriseApiOrigin)
 }
 
 async function launchExtension(testInfo) {
@@ -116,8 +136,8 @@ async function launchExtension(testInfo) {
   return context
 }
 
-async function openMockRepoPage(page) {
-  await page.goto('https://github.com/gatewayapps/kamino')
+async function openMockRepoPage(page, origin = githubOrigin) {
+  await page.goto(`${origin}/gatewayapps/kamino`)
 }
 
 async function softNavigate(page, path, bodyHtml) {
@@ -189,12 +209,23 @@ test.describe('Kamino extension smoke tests', () => {
     context = await launchExtension(testInfo)
     page = await context.newPage()
 
-    await page.goto('https://github.com/gatewayapps/kamino/issues/123')
+    await page.goto(`${githubOrigin}/gatewayapps/kamino/issues/123`)
     await page.bringToFront()
     await injectKaminoContentScripts(context, page.url(), appContentScriptFiles)
 
     await expect(page.locator('.sidebar-kamino')).toBeVisible()
     await expect(page.locator('.batchButton')).toHaveCount(0)
+  })
+
+  test('does not render on non-github hosts with github-like issue paths', async ({}, testInfo) => {
+    context = await launchExtension(testInfo)
+    page = await context.newPage()
+
+    await page.goto(`${nonGithubOrigin}/gatewayapps/kamino/issues/123`)
+    await page.bringToFront()
+    await injectKaminoContentScripts(context, page.url(), appContentScriptFiles)
+
+    await expect(page.locator('.sidebar-kamino')).toHaveCount(0)
   })
 
   test('recovers batch cloning after GitHub redraws the issue toolbar', async ({}, testInfo) => {
@@ -214,6 +245,17 @@ test.describe('Kamino extension smoke tests', () => {
     await expect(page.locator('.batchButton')).toBeVisible()
   })
 
+  test('shows batch cloning on github enterprise issue lists', async ({}, testInfo) => {
+    context = await launchExtension(testInfo)
+    page = await context.newPage()
+
+    await openMockRepoPage(page, enterpriseOrigin)
+    await softNavigate(page, '/gatewayapps/kamino/issues?q=is%3Aclosed+is%3Aissue')
+
+    await expect(page.locator('.batchButton')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Batch Clone' })).toBeEnabled()
+  })
+
   test('preserves source markdown when source attribution and blockquotes are disabled', async ({}, testInfo) => {
     context = await launchExtension(testInfo)
 
@@ -230,13 +272,13 @@ test.describe('Kamino extension smoke tests', () => {
     const createIssueRequest = new Promise((resolve) => {
       resolveCreateIssueRequest = resolve
     })
-    await context.route('https://api.github.com/repos/gatewayapps/target-repo/issues', async (route) => {
+    await context.route(`${githubApiOrigin}/repos/gatewayapps/target-repo/issues`, async (route) => {
       if (route.request().method() === 'POST') {
         const createIssuePayload = route.request().postDataJSON()
         resolveCreateIssueRequest(createIssuePayload)
 
         await jsonResponse(route, {
-          html_url: 'https://github.com/gatewayapps/target-repo/issues/456',
+          html_url: `${githubOrigin}/gatewayapps/target-repo/issues/456`,
           number: 456,
         })
         return
@@ -246,7 +288,7 @@ test.describe('Kamino extension smoke tests', () => {
     })
 
     page = await context.newPage()
-    await page.goto('https://github.com/gatewayapps/kamino/issues/123')
+    await page.goto(`${githubOrigin}/gatewayapps/kamino/issues/123`)
     await page.bringToFront()
     await injectKaminoContentScripts(context, page.url(), appContentScriptFiles)
 
@@ -257,5 +299,51 @@ test.describe('Kamino extension smoke tests', () => {
     const createIssuePayload = await createIssueRequest
 
     expect(createIssuePayload.body).toBe(sourceIssueBody)
+  })
+
+  test('uses the enterprise api when cloning enterprise issues', async ({}, testInfo) => {
+    context = await launchExtension(testInfo)
+
+    await setExtensionStorage(context, {
+      addBlockquote: false,
+      cloneComments: false,
+      createTab: false,
+      disableCommentsOnOriginal: true,
+      githubToken: 'token',
+      mostUsed: ['gatewayapps/target-repo'],
+    })
+
+    let resolveCreateIssueRequest
+    const createIssueRequest = new Promise((resolve) => {
+      resolveCreateIssueRequest = resolve
+    })
+    await context.route(`${enterpriseApiOrigin}/repos/gatewayapps/target-repo/issues`, async (route) => {
+      if (route.request().method() === 'POST') {
+        const createIssuePayload = route.request().postDataJSON()
+        resolveCreateIssueRequest({ payload: createIssuePayload, url: route.request().url() })
+
+        await jsonResponse(route, {
+          html_url: `${enterpriseOrigin}/gatewayapps/target-repo/issues/456`,
+          number: 456,
+        })
+        return
+      }
+
+      await jsonResponse(route, {})
+    })
+
+    page = await context.newPage()
+    await page.goto(`${enterpriseOrigin}/gatewayapps/kamino/issues/123`)
+    await page.bringToFront()
+    await injectKaminoContentScripts(context, page.url(), appContentScriptFiles)
+
+    await expect(page.locator('.quickClone[data-repo="gatewayapps/target-repo"]')).toBeVisible()
+    await page.locator('.quickClone').click()
+    await page.locator('.cloneAndKeepOpen').click()
+
+    const createIssuePayload = await createIssueRequest
+
+    expect(createIssuePayload.url).toBe(`${enterpriseApiOrigin}/repos/gatewayapps/target-repo/issues`)
+    expect(createIssuePayload.payload.body).toBe(sourceIssueBody)
   })
 })

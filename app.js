@@ -18,11 +18,21 @@ if (token === '') {
 }
 
 function initializeExtension() {
-  const { currentRepo, error, issueNumber, organization, url } = populateUrlMetadata(document.location.href)
+  const {
+    currentRepo,
+    error,
+    githubApiUrl: currentGithubApiUrl,
+    githubOrigin,
+    issueNumber,
+    organization,
+    url,
+  } = populateUrlMetadata(document.location.href)
 
   if (error) {
     return
   }
+
+  githubApiUrl = currentGithubApiUrl
 
   if (!isIssueDetailUrl({ currentRepo, issueNumber, organization, url })) {
     return
@@ -43,7 +53,7 @@ function initializeExtension() {
   }
 
   intervalIds.forEach(clearInterval)
-  saveAppliedFilters({ currentRepo, issueNumber, organization, url })
+  saveAppliedFilters({ currentRepo, githubOrigin, issueNumber, organization, url })
 
   const kaminoButton = $(Handlebars.templates.button().replace(/(\r\n|\n|\r)/gm, ''))
   const modalContext = {
@@ -126,7 +136,7 @@ function isIssueDetailUrl(urlMetadata) {
 }
 
 function saveAppliedFilters(urlMetadata) {
-  const { currentRepo, issueNumber, organization, url } = urlMetadata
+  const { currentRepo, githubOrigin, issueNumber, organization, url } = urlMetadata
 
   // url should have /issues and should not track any url that has an issue number at the end
   if (url.indexOf('/issues') > 0 && isNaN(issueNumber)) {
@@ -139,6 +149,7 @@ function saveAppliedFilters(urlMetadata) {
 
     var newFilter = {
       filter: querystring,
+      githubOrigin,
       organization,
       currentRepo,
     }
@@ -283,11 +294,15 @@ function searchRepositories(searchTerm) {
 }
 
 async function getGithubIssue(repo, closeOriginal) {
-  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+  const { currentRepo, error, githubApiUrl: currentGithubApiUrl, issueNumber, organization } = populateUrlMetadata(
+    document.location.href
+  )
 
   if (error) {
     return
   }
+
+  githubApiUrl = currentGithubApiUrl
 
   const repoName = repo.split('/')[1]
 
@@ -365,11 +380,15 @@ function createClonedCommentBody(comment, options) {
 }
 
 async function createGithubIssue(repo, oldIssue, closeOriginal) {
-  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+  const { currentRepo, error, githubApiUrl: currentGithubApiUrl, issueNumber, organization } = populateUrlMetadata(
+    document.location.href
+  )
 
   if (error) {
     return
   }
+
+  githubApiUrl = currentGithubApiUrl
 
   const options = await getSyncStorage({
     addBlockquote: true,
@@ -428,21 +447,33 @@ async function closeGithubIssue() {
     state: 'closed',
   }
 
-  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+  const { currentRepo, error, githubApiUrl: currentGithubApiUrl, issueNumber, organization } = populateUrlMetadata(
+    document.location.href
+  )
 
   if (error) {
     return
   }
+
+  githubApiUrl = currentGithubApiUrl
 
   await ajaxRequest('PATCH', issueToClose, `${githubApiUrl}repos/${organization}/${currentRepo}/issues/${issueNumber}`)
 }
 
 async function commentOnIssue(repo, newIssue, closeOriginal) {
-  const { currentRepo, error, issueNumber, organization } = populateUrlMetadata(document.location.href)
+  const {
+    currentRepo,
+    error,
+    githubApiUrl: currentGithubApiUrl,
+    issueNumber,
+    organization,
+  } = populateUrlMetadata(document.location.href)
 
   if (error) {
     return
   }
+
+  githubApiUrl = currentGithubApiUrl
 
   const newIssueLink = `[${repo}](${newIssue.html_url})`
   const comment = {
@@ -467,7 +498,11 @@ async function commentOnIssue(repo, newIssue, closeOriginal) {
 }
 
 function goToIssueList(repo, issueNumber, org, oldRepo) {
-  chrome.runtime.sendMessage({ repo: repo, issueNumber: issueNumber, organization: org, oldRepo: oldRepo }, () => {})
+  const { githubOrigin } = populateUrlMetadata(document.location.href)
+  chrome.runtime.sendMessage(
+    { repo: repo, issueNumber: issueNumber, organization: org, oldRepo: oldRepo, githubOrigin },
+    () => {}
+  )
 }
 
 function delay(milliseconds) {
