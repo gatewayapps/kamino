@@ -12,8 +12,8 @@
         "./lib/addBlockQuote.js",
         "./lib/preventReferences.js",
         "./lib/preventMentions.js",
-        "./batch.js",
-        "./template.js"
+        "./template.js",
+        "./batch.js"
       ],
       "css": ["./css/style.css"],
       "run_at": "document_end"
@@ -29,8 +29,8 @@
         "./lib/addBlockQuote.js",
         "./lib/preventReferences.js",
         "./lib/preventMentions.js",
-        "./app.js",
-        "./template.js"
+        "./template.js",
+        "./app.js"
       ],
       "css": ["./css/style.css"],
       "run_at": "document_end"

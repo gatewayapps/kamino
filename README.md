@@ -63,6 +63,23 @@ Outside of the use of your Personal Access Token used by Kamino to perform its c
 
 Kamino can be packaged and uploaded to the Chrome Web Store from the command line or from a manual GitHub Actions workflow. The automation uses the Chrome Web Store API v2 documented at https://developer.chrome.com/docs/webstore/using-api.
 
+## Testing
+
+Run unit tests with:
+
+```sh
+yarn test
+```
+
+Run the browser-based extension smoke tests with:
+
+```sh
+yarn playwright install chromium
+yarn test:e2e
+```
+
+The Playwright suite loads Kamino as an unpacked Chromium extension and uses mocked GitHub pages/API responses.
+
 ### Package the extension
 
 ```sh
