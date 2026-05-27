@@ -3,11 +3,13 @@
     "build": "node scripts/package-extension.js",
     "package": "node scripts/package-extension.js",
     "release:chrome": "node scripts/package-extension.js && node scripts/deploy-chrome-web-store.js --publish",
+    "test:e2e": "playwright test",
     "upload:chrome": "node scripts/package-extension.js && node scripts/deploy-chrome-web-store.js",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {},
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "jest": "^29.7.0"
   }
 }

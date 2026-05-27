@@ -21,6 +21,10 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Jest Test
         run: yarn test
+      - name: Install Playwright Browsers
+        run: yarn playwright install --with-deps chromium
+      - name: Extension Smoke Tests
+        run: xvfb-run --auto-servernum yarn test:e2e
       - name: Package Extension
         run: yarn build
       - name: Upload Extension Package
